@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Nunito", sans-serif;
+  --font-portal: "DM Sans", sans-serif;
+  --font-ipa: "Doulos SIL", serif;
+
+  --color-brand-gold: #F5B800;
+  --color-brand-navy: #1E2A4A;
+  --color-brand-offwhite: #F8F7F2;
+  --color-brand-dark: #1A1A2E;
+  --color-brand-mid: #555566;
+  --color-brand-muted: #888899;
+
+  --color-series-purple: #7B1FA2;
+  --color-series-blue: #1565C0;
+  --color-series-green: #2E7D32;
+  --color-series-teal: #1E6B5A;
+  --color-series-red: #B71C1C;
+
+  --color-success: #4CAF50;
+  --color-error: #E53935;
+}
+
+@layer base {
+  body {
+    @apply bg-brand-offwhite text-brand-dark font-sans antialiased;
+  }
+
+  h1, h2, h3 {
+    @apply font-display font-bold text-brand-navy;
+  }
+
+  .ipa-text {
+    font-family: "Doulos SIL", serif;
+  }
+
+  .dyslexic-mode {
+    font-family: "OpenDyslexic", sans-serif !important;
+  }
+}
+
+/* Diagonal Header Motif */
+.diagonal-header-gold {
+  clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%);
+}
+
+.diagonal-header-navy {
+  clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.corner-accent {
+  clip-path: polygon(60% 0, 100% 0, 100% 40%);
+}
+
+/* IPA Watermark Texture */
+.ipa-watermark {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  color: white;
+  font-family: "Doulos SIL", serif;
+  font-size: 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  padding: 20px;
+  gap: 40px;
+}
+

@@ -1,0 +1,5 @@
+{
+  "name": "De-Brill Learn",
+  "description": "Educational phonics and English pronunciation app for Nigerian primary school learners (ages 2–11).",
+  "requestFramePermissions": ["microphone"]
+}
