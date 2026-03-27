@@ -104,7 +104,15 @@ export const WelcomeCarousel = () => {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <StatusBar />
-      
+
+      <div className="flex items-center justify-center pt-4 pb-2">
+        <img
+          src="/dbc-logo.png"
+          alt="De-Brill"
+          className="w-12 h-12 object-contain"
+        />
+      </div>
+
       <div className="flex-1 flex flex-col items-center justify-center p-8 relative overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div

@@ -3,7 +3,7 @@ import { cn } from '@/src/lib/utils';
 
 export const StatusBar = () => {
   return (
-    <div className="h-[44px] bg-[#1A1A1A] flex items-center justify-between px-6 text-white text-[12px] font-medium z-50 sticky top-0">
+    <div className="h-[44px] bg-[#1B3A7A] flex items-center justify-between px-6 text-white text-[12px] font-medium z-50 sticky top-0">
       <span>9:41</span>
       <div className="flex items-center gap-1.5">
         <div className="w-4 h-4 rounded-full border border-white/40 flex items-center justify-center">
@@ -36,7 +36,7 @@ interface DiagonalHeaderProps {
 export const DiagonalHeader = ({ 
   title, 
   subtitle, 
-  accentColor = '#2E7D32', 
+  accentColor = '#4DBBEE',
   showWatermark = true,
   className,
   children

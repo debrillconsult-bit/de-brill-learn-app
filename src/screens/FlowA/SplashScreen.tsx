@@ -22,18 +22,11 @@ export const SplashScreen = () => {
       <div className="flex-1 relative overflow-hidden">
         {/* Diagonal Hero Panel */}
         <div className="absolute inset-0 bg-brand-gold diagonal-header-gold z-10 flex flex-col items-center justify-center pb-20">
-          {/* Diagonal split logo mark: gold-left / navy-right with white separator */}
-          <div className="relative w-16 h-16 rounded-2xl overflow-hidden mb-4 flex-shrink-0">
-            {/* Gold left half */}
-            <div className="absolute inset-0 bg-brand-gold diagonal-header-gold flex items-center justify-center">
-              <span className="text-brand-navy font-bold text-[18px] relative z-10">DB</span>
-            </div>
-            {/* Navy right half */}
-            <div className="absolute inset-0 bg-brand-navy diagonal-header-navy" />
-            {/* White diagonal separator strip */}
-            <div
-              className="absolute inset-0"
-              style={{ clipPath: 'polygon(83% 0, 87% 0, 17% 100%, 13% 100%)', background: 'white' }}
+          <div className="w-24 h-24 rounded-[20px] bg-white flex items-center justify-center shadow-lg overflow-hidden p-1 mb-4">
+            <img
+              src="/dbc-logo.png"
+              alt="De-Brill Consults"
+              className="w-full h-full object-contain"
             />
           </div>
           <h1 className="text-white text-[28px] font-extrabold mb-2">De-Brill Learn</h1>
@@ -57,13 +50,13 @@ export const SplashScreen = () => {
         </div>
 
         {/* Top Right Accent */}
-        <div className="absolute top-0 right-0 w-20 h-20 bg-series-green corner-accent z-20" />
+        <div className="absolute top-0 right-0 w-20 h-20 bg-[#4DBBEE] corner-accent z-20" />
       </div>
 
       {/* Bottom Surface */}
       <div className="h-[30%] bg-white px-8 flex flex-col items-center justify-center gap-4">
         <button 
-          className="w-full h-12 bg-brand-gold rounded-[20px] text-brand-navy font-bold text-[14px]"
+          className="w-full h-12 bg-[#F47920] rounded-[20px] text-brand-navy font-bold text-[14px]"
           onClick={(e) => { e.stopPropagation(); navigate('/welcome'); }}
         >
           Get started

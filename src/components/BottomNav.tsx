@@ -8,7 +8,7 @@ export const BottomNav = () => {
     { id: 'home', label: 'Home', icon: Home, path: '/home-student' },
     { id: 'library', label: 'Library', icon: BookOpen, path: '/library' },
     { id: 'practice', label: 'Practice', icon: Gamepad2, path: '/practice' },
-    { id: 'progress', label: 'Progress', icon: BarChart3, path: '/progress' },
+    { id: 'sounds', label: 'Sounds', icon: BookOpen, path: '/sound-chart' },
     { id: 'profile', label: 'Profile', icon: UserCircle, path: '/profile' },
   ];
 

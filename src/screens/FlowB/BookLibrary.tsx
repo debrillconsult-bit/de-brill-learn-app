@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StatusBar, DiagonalHeader } from '@/src/components/Layout';
 import { Lock, Star } from 'lucide-react';
+import { BookCover } from '@/src/components/BookCover';
 import { cn } from '@/src/lib/utils';
 
 const books = [
@@ -56,7 +57,13 @@ export const BookLibrary = () => {
               className="h-32 bg-brand-offwhite relative flex items-center justify-center"
               style={{ borderLeft: `6px solid ${book.color}` }}
             >
-              <div className="w-16 h-20 bg-white shadow-sm rounded-sm border border-[#EEEEEE]" />
+              <BookCover
+                title={book.title}
+                classLevel={'Ages ' + book.age}
+                series={book.series as 'Phonics' | 'MEP'}
+                color={book.color}
+                size="md"
+              />
               {book.locked && (
                 <div className="absolute inset-0 bg-brand-navy/40 flex items-center justify-center">
                   <div className="bg-white p-2 rounded-full">

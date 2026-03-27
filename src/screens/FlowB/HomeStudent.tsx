@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StatusBar, DiagonalHeader } from '@/src/components/Layout';
 import { Play, Star, Trophy, Sparkles } from 'lucide-react';
+import { BookCover } from '@/src/components/BookCover';
 
 export const HomeStudent = () => {
   const navigate = useNavigate();
@@ -10,9 +11,16 @@ export const HomeStudent = () => {
     <div className="flex-1 flex flex-col bg-brand-offwhite overflow-y-auto pb-4">
       <StatusBar />
       <DiagonalHeader>
-        <div className="flex flex-col gap-0.5 ml-4">
-          <span className="text-[12px] text-brand-navy/60">Good morning,</span>
-          <span className="text-[16px] font-bold text-brand-navy">Chidi Obi</span>
+        <div className="flex items-center gap-3 ml-2">
+          <img
+            src="/dbc-logo.png"
+            alt="De-Brill"
+            className="w-8 h-8 object-contain"
+          />
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[12px] text-brand-navy/60">Good morning,</span>
+            <span className="text-[16px] font-bold text-brand-navy">Chidi Obi</span>
+          </div>
         </div>
         <div className="ml-auto mr-16 flex items-center gap-2 bg-brand-gold/20 border border-brand-gold/50 rounded-full px-3 py-1">
           <div className="w-2 h-2 bg-brand-gold rounded-full animate-pulse" />
@@ -68,6 +76,21 @@ export const HomeStudent = () => {
           </div>
         </div>
 
+        {/* Sound Chart Quick Access */}
+        <button
+          onClick={() => navigate('/sound-chart')}
+          className="bg-[#1B3A7A] rounded-[12px] p-4 flex items-center gap-4 active:scale-[0.98] transition-transform"
+        >
+          <div className="w-12 h-12 rounded-full bg-[#F47920] flex items-center justify-center shrink-0">
+            <span className="text-white font-bold text-[16px]">/ɪ/</span>
+          </div>
+          <div className="flex flex-col gap-0.5 text-left">
+            <span className="text-[10px] font-bold text-[#4DBBEE] uppercase tracking-widest">REFERENCE</span>
+            <h3 className="text-[15px] font-bold text-white">English Sound Chart</h3>
+            <p className="text-white/60 text-[11px]">All 44 phonemes — tap to hear</p>
+          </div>
+        </button>
+
         {/* My Books Section */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
@@ -89,7 +112,13 @@ export const HomeStudent = () => {
                   className="absolute left-0 top-0 bottom-0 w-1.5"
                   style={{ backgroundColor: book.color }}
                 />
-                <div className="w-12 h-16 bg-brand-offwhite rounded-sm border border-[#EEEEEE] shrink-0" />
+                <BookCover
+                  title={book.title}
+                  classLevel={book.title}
+                  series={book.title.includes('MEP') ? 'MEP' : 'Phonics'}
+                  color={book.color}
+                  size="sm"
+                />
                 <div className="flex-1 flex flex-col gap-0.5">
                   <h4 className="text-[14px] font-bold text-brand-navy">{book.title}</h4>
                   <p className="text-[11px] text-brand-muted">{book.subtitle}</p>

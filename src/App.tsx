@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { SplashScreen } from './screens/FlowA/SplashScreen';
 import { WelcomeCarousel } from './screens/FlowA/WelcomeCarousel';
 import { RoleSelection } from './screens/FlowA/RoleSelection';
@@ -20,6 +20,7 @@ import { LessonPractice } from './screens/FlowB/LessonPractice';
 import { LessonComprehension } from './screens/FlowB/LessonComprehension';
 import { LessonCompletion } from './screens/FlowB/LessonCompletion';
 import { OfflineMode } from './screens/FlowB/OfflineMode';
+import { SoundChart } from './screens/FlowB/SoundChart';
 import { PracticeMenu } from './screens/FlowD/PracticeMenu';
 import { SoundSafari } from './screens/FlowD/SoundSafari';
 import { BlendBridge } from './screens/FlowD/BlendBridge';
@@ -51,8 +52,7 @@ export default function App() {
       <div className="max-w-[390px] mx-auto bg-white min-h-screen shadow-2xl relative flex flex-col">
         <div className="flex-1 flex flex-col overflow-hidden">
           <Routes>
-            <Route path="/" element={<SplashScreen />} />
-            <Route path="/welcome" element={<WelcomeCarousel />} />
+            <Route path="/welcome" element={<div>Welcome Screen</div>} />
             <Route path="/role-selection" element={<RoleSelection />} />
             <Route path="/account-creation" element={<AccountCreation />} />
             <Route path="/email-verification" element={<EmailVerification />} />
@@ -76,6 +76,7 @@ export default function App() {
             <Route path="/lesson/comprehension" element={<LessonComprehension />} />
             <Route path="/lesson/completion" element={<LessonCompletion />} />
             <Route path="/offline" element={<OfflineMode />} />
+            <Route path="/sound-chart" element={<SoundChart />} />
             
             {/* Flow D: Practice & Games */}
             <Route path="/practice" element={<PracticeMenu />} />
@@ -118,6 +119,7 @@ export default function App() {
           <Route path="/practice" element={<BottomNav />} />
           <Route path="/progress" element={<BottomNav />} />
           <Route path="/profile" element={<BottomNav />} />
+          <Route path="/sound-chart" element={<BottomNav />} />
         </Routes>
       </div>
     </Router>

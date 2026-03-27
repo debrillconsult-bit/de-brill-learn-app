@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" fill="#1B3A7A" rx="20"/>
+  <polygon points="0,0 200,0 120,200 0,200" fill="#F47920"/>
+  <polygon points="80,0 200,0 200,200 0,200" fill="#1B3A7A"/>
+  <line x1="80" y1="0" x2="0" y2="200" stroke="white" stroke-width="8"/>
+  <text x="40" y="115" font-family="Arial,sans-serif" font-weight="bold" font-size="52" fill="white">DB</text>
+  <text x="115" y="115" font-family="Arial,sans-serif" font-weight="bold" font-size="52" fill="#F47920">C</text>
+</svg>
