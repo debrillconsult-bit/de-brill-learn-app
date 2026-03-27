@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import Anthropic from '@anthropic-ai/sdk';
 
 const COACH_SYSTEM_PROMPT = `You are Coach Brill,

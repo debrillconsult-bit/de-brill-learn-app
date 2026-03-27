@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">De-Brill Learn</string>
+    <string name="title_activity_main">De-Brill Learn</string>
+    <string name="package_name">com.debrill.learn</string>
+    <string name="custom_url_scheme">com.debrill.learn</string>
+</resources>
