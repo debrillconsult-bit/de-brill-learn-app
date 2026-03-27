@@ -2,18 +2,17 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StatusBar, DiagonalHeader } from '@/src/components/Layout';
 import { Lock, Star } from 'lucide-react';
-import { BookCover } from '@/src/components/BookCover';
 import { cn } from '@/src/lib/utils';
 
 const books = [
-  { id: 'bp-pren', title: 'Blended Phonics Pre-Nursery', series: 'Phonics', age: '2-3', color: '#7B1FA2', locked: false },
-  { id: 'bp-n1', title: 'Blended Phonics Nursery 1', series: 'Phonics', age: '3-4', color: '#F5B800', locked: false },
-  { id: 'bp-n2', title: 'Blended Phonics Nursery 2', series: 'Phonics', age: '4-5', color: '#388E3C', locked: false },
-  { id: 'mep-p1', title: 'MEP Primary 1', series: 'MEP', age: '5-6', color: '#7B1FA2', locked: false },
-  { id: 'mep-p2', title: 'MEP Primary 2', series: 'MEP', age: '6-7', color: '#1565C0', locked: true },
-  { id: 'mep-p3', title: 'MEP Primary 3', series: 'MEP', age: '7-8', color: '#2E7D32', locked: true },
-  { id: 'mep-p4', title: 'MEP Primary 4', series: 'MEP', age: '8-9', color: '#1E6B5A', locked: true },
-  { id: 'mep-p5', title: 'MEP Primary 5', series: 'MEP', age: '9-11', color: '#B71C1C', locked: true },
+  { id: 'bp-pren', title: 'Blended Phonics Pre-Nursery', series: 'Phonics', age: '2-3', color: '#7B1FA2', locked: false, coverSrc: new URL('../../../Book covers/Pre-Nursery.jpg', import.meta.url).href },
+  { id: 'bp-n1', title: 'Blended Phonics Nursery 1', series: 'Phonics', age: '3-4', color: '#F5B800', locked: false, coverSrc: new URL('../../../Book covers/Nursery 1.jpg', import.meta.url).href },
+  { id: 'bp-n2', title: 'Blended Phonics Nursery 2', series: 'Phonics', age: '4-5', color: '#388E3C', locked: false, coverSrc: new URL('../../../Book covers/Nursery 2.jpg', import.meta.url).href },
+  { id: 'mep-p1', title: 'MEP Primary 1', series: 'MEP', age: '5-6', color: '#7B1FA2', locked: false, coverSrc: new URL('../../../Book covers/Primary 1.jpg', import.meta.url).href },
+  { id: 'mep-p2', title: 'MEP Primary 2', series: 'MEP', age: '6-7', color: '#1565C0', locked: true, coverSrc: new URL('../../../Book covers/Primary 2.jpg', import.meta.url).href },
+  { id: 'mep-p3', title: 'MEP Primary 3', series: 'MEP', age: '7-8', color: '#2E7D32', locked: true, coverSrc: new URL('../../../Book covers/Primary 3.jpg', import.meta.url).href },
+  { id: 'mep-p4', title: 'MEP Primary 4', series: 'MEP', age: '8-9', color: '#1E6B5A', locked: true, coverSrc: new URL('../../../Book covers/Primary 4.jpg', import.meta.url).href },
+  { id: 'mep-p5', title: 'MEP Primary 5', series: 'MEP', age: '9-11', color: '#B71C1C', locked: true, coverSrc: new URL('../../../Book covers/Primary 5.jpg', import.meta.url).href },
 ];
 
 export const BookLibrary = () => {
@@ -57,12 +56,10 @@ export const BookLibrary = () => {
               className="h-32 bg-brand-offwhite relative flex items-center justify-center"
               style={{ borderLeft: `6px solid ${book.color}` }}
             >
-              <BookCover
-                title={book.title}
-                classLevel={'Ages ' + book.age}
-                series={book.series as 'Phonics' | 'MEP'}
-                color={book.color}
-                size="md"
+              <img
+                src={book.coverSrc}
+                alt={book.title}
+                className="h-28 w-20 rounded-[6px] object-cover shadow-sm"
               />
               {book.locked && (
                 <div className="absolute inset-0 bg-brand-navy/40 flex items-center justify-center">

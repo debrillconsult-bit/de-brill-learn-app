@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { StatusBar } from '@/src/components/Layout';
 import { X, Volume2, CheckCircle2, MoveRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { getLetterSpeech, speakText, stopSpeaking } from '@/src/lib/speech';
 
 const wordData = {
   word: 'CAT',
@@ -15,8 +16,15 @@ export const BlendBridge = () => {
   const [selectedPhonemes, setSelectedPhonemes] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
 
+  React.useEffect(() => {
+    return () => {
+      stopSpeaking();
+    };
+  }, []);
+
   const handleOptionClick = (phoneme: string) => {
     if (selectedPhonemes.length < 3) {
+      void speakText(getLetterSpeech(phoneme));
       const newPhonemes = [...selectedPhonemes, phoneme];
       setSelectedPhonemes(newPhonemes);
       
@@ -58,7 +66,11 @@ export const BlendBridge = () => {
           <div className="w-40 h-40 bg-white rounded-[32px] shadow-lg flex items-center justify-center text-[80px]">
             🐱
           </div>
-          <button className="flex items-center gap-2 bg-brand-navy text-white px-6 py-2 rounded-full active:scale-95 transition-transform">
+          <button
+            type="button"
+            onClick={() => void speakText(wordData.word)}
+            className="flex items-center gap-2 bg-brand-navy text-white px-6 py-2 rounded-full active:scale-95 transition-transform"
+          >
             <Volume2 size={20} />
             <span className="font-bold">Listen</span>
           </button>

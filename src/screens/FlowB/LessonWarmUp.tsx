@@ -3,12 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { StatusBar } from '@/src/components/Layout';
 import { X, Volume2, ChevronRight } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
+import { getSoundPrompt, speakText, stopSpeaking } from '@/src/lib/speech';
 
 export const LessonWarmUp = () => {
   const navigate = useNavigate();
   const [activePhoneme, setActivePhoneme] = React.useState<string | null>('bl');
 
   const phonemes = ['bl', 'cl', 'fl', 'sl', 'br', 'cr', 'dr', 'fr'];
+  const activePrompt = activePhoneme ? `/${activePhoneme}/` : '';
+
+  React.useEffect(() => () => stopSpeaking(), []);
+
+  const handlePhonemeTap = (phoneme: string) => {
+    setActivePhoneme(phoneme);
+    void speakText(getSoundPrompt(phoneme));
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-brand-offwhite">
@@ -39,7 +48,7 @@ export const LessonWarmUp = () => {
           {phonemes.map((p) => (
             <button
               key={p}
-              onClick={() => setActivePhoneme(p)}
+              onClick={() => handlePhonemeTap(p)}
               className={cn(
                 "aspect-square rounded-[12px] flex items-center justify-center text-[20px] font-ipa transition-all active:scale-95",
                 activePhoneme === p 
@@ -64,10 +73,13 @@ export const LessonWarmUp = () => {
           </div>
           
           <div className="flex flex-col items-center gap-2">
-            <button className="w-16 h-16 rounded-full bg-brand-gold flex items-center justify-center shadow-lg active:scale-95 transition-transform">
+            <button
+              onClick={() => activePhoneme && void speakText(getSoundPrompt(activePhoneme))}
+              className="w-16 h-16 rounded-full bg-brand-gold flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+            >
               <Volume2 size={32} className="text-brand-navy" />
             </button>
-            <span className="text-[12px] font-bold text-brand-navy uppercase tracking-wider">Tap to hear /{activePhoneme}/</span>
+            <span className="text-[12px] font-bold text-brand-navy uppercase tracking-wider">Tap to hear {activePrompt}</span>
           </div>
         </div>
       </div>

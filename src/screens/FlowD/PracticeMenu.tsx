@@ -15,6 +15,14 @@ const games = [
 
 export const PracticeMenu = () => {
   const navigate = useNavigate();
+  const gameRoutes: Record<string, string> = {
+    safari: '/game/safari',
+    bridge: '/game/bridge',
+    pairs: '/game/pairs',
+    transcription: '/game/transcription',
+    bee: '/game/bee',
+    hop: '/game/hop',
+  };
 
   return (
     <div className="flex-1 flex flex-col bg-brand-offwhite overflow-y-auto pb-20">
@@ -23,7 +31,10 @@ export const PracticeMenu = () => {
 
       <div className="p-4 flex flex-col gap-6">
         {/* Daily Challenge Card */}
-        <button className="bg-brand-navy rounded-[16px] p-5 flex items-center gap-4 text-white shadow-lg relative overflow-hidden active:scale-[0.98] transition-transform">
+        <button
+          onClick={() => navigate('/sound-chart')}
+          className="bg-brand-navy rounded-[16px] p-5 flex items-center gap-4 text-white shadow-lg relative overflow-hidden active:scale-[0.98] transition-transform"
+        >
           <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -translate-y-8 translate-x-8" />
           <div className="w-14 h-14 rounded-full bg-brand-gold flex items-center justify-center shrink-0 shadow-lg">
             <Star size={32} className="text-brand-navy fill-current" />
@@ -49,7 +60,7 @@ export const PracticeMenu = () => {
             {games.map((game) => (
               <button
                 key={game.id}
-                onClick={() => navigate(`/game/${game.id}`)}
+                onClick={() => navigate(gameRoutes[game.id])}
                 className="bg-white rounded-[16px] border border-[#DDDDDD] p-5 flex flex-col items-center text-center gap-3 active:scale-95 transition-all shadow-sm"
               >
                 <div 

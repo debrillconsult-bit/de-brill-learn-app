@@ -112,7 +112,10 @@ export const BookDetail = () => {
       <div className="px-6 py-4 flex flex-col items-center gap-2">
         <p className="text-[12px] text-brand-muted">2 of 19 units complete • 4h 20m remaining</p>
         {activeTerm === 1 && (
-          <button className="w-full h-12 bg-brand-gold rounded-[20px] text-brand-navy font-bold text-[14px] mt-2 shadow-lg">
+          <button
+            onClick={() => navigate('/unit/1')}
+            className="w-full h-12 bg-brand-gold rounded-[20px] text-brand-navy font-bold text-[14px] mt-2 shadow-lg"
+          >
             Start Term Review
           </button>
         )}

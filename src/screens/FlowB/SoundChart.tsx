@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { StatusBar, DiagonalHeader } from '@/src/components/Layout';
 import { Volume2, X } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
+import { getSoundPrompt, speakText, stopSpeaking } from '@/src/lib/speech';
 
 interface SoundCell {
   symbol: string;
@@ -29,7 +30,7 @@ const DIPHTHONGS: SoundCell[] = [
   { symbol: 'ɪə', word: 'Fear', type: 'diphthong' },
   { symbol: 'eɪ', word: 'Bouquet', type: 'diphthong' },
   { symbol: 'ʊə', word: 'Sure', type: 'diphthong' },
-  { symbol: 'ɔɪ', word: 'Bay', type: 'diphthong' },
+  { symbol: 'ɔɪ', word: 'Boy', type: 'diphthong' },
   { symbol: 'əʊ', word: 'Goat', type: 'diphthong' },
   { symbol: 'eə', word: 'Bear', type: 'diphthong' },
   { symbol: 'aɪ', word: 'Pint', type: 'diphthong' },
@@ -63,26 +64,6 @@ const CONSONANTS: SoundCell[] = [
   { symbol: 'j', word: 'Yellow', type: 'consonant' },
 ];
 
-const speak = (text: string) => {
-  if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'en-GB';
-  utterance.rate = 0.85;
-  utterance.pitch = 1;
-
-  const voices = window.speechSynthesis.getVoices();
-  const britishVoice = voices.find(v =>
-    v.lang === 'en-GB' ||
-    v.name.includes('British') ||
-    v.name.includes('Daniel') ||
-    v.name.includes('Kate')
-  );
-  if (britishVoice) utterance.voice = britishVoice;
-
-  window.speechSynthesis.speak(utterance);
-};
-
 interface SoundTileProps {
   cell: SoundCell;
   isActive: boolean;
@@ -90,6 +71,19 @@ interface SoundTileProps {
   bgColor: string;
   activeColor: string;
 }
+
+const speechOrganModules = import.meta.glob('../../../Speech Organs/*.{png,jpg,jpeg,webp}', {
+  eager: true,
+  import: 'default',
+}) as Record<string, string>;
+
+const speechOrganBySymbol = Object.fromEntries(
+  Object.entries(speechOrganModules).map(([path, src]) => {
+    const filename = path.split('/').pop() ?? '';
+    const symbol = filename.replace(/\.[^/.]+$/, '').trim();
+    return [symbol, src];
+  })
+) as Record<string, string>;
 
 const SoundTile = ({
   cell, isActive, onTap, bgColor, activeColor
@@ -144,29 +138,17 @@ export const SoundChart = () => {
   const navigate = useNavigate();
   const [activeCell, setActiveCell] = React.useState<SoundCell | null>(null);
   const [activeTab, setActiveTab] = React.useState<'vowels' | 'consonants'>('vowels');
-  const [voicesLoaded, setVoicesLoaded] = React.useState(false);
+  const activeDiagram = activeCell ? speechOrganBySymbol[activeCell.symbol] : null;
 
-  React.useEffect(() => {
-    const loadVoices = () => {
-      window.speechSynthesis.getVoices();
-      setVoicesLoaded(true);
-    };
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-      window.speechSynthesis.onvoiceschanged = loadVoices;
-    }
-    loadVoices();
-    return () => {
-      window.speechSynthesis.cancel();
-    };
-  }, []);
+  React.useEffect(() => () => stopSpeaking(), []);
 
   const handleTap = (cell: SoundCell) => {
     setActiveCell(cell);
-    speak(cell.word);
+    void speakText(getSoundPrompt(cell.symbol, cell.word));
   };
 
   const handleWordTap = (word: string) => {
-    speak(word);
+    void speakText(word);
   };
 
   return (
@@ -200,7 +182,7 @@ export const SoundChart = () => {
       </div>
 
       {activeCell && (
-        <div className="mx-4 mt-4 bg-[#1B3A7A] rounded-[16px] p-4 flex items-center gap-4">
+        <div className="relative mx-4 mt-4 bg-[#1B3A7A] rounded-[16px] p-4 flex items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-[#F47920] flex items-center justify-center shrink-0">
             <span className="text-white font-bold text-[20px]">
               /{activeCell.symbol}/
@@ -221,9 +203,16 @@ export const SoundChart = () => {
               Tap the word to hear it again
             </span>
           </div>
+          {activeDiagram && (
+            <img
+              src={activeDiagram}
+              alt={`${activeCell.symbol} speech organ diagram`}
+              className="h-20 w-20 shrink-0 rounded-[12px] bg-white/10 object-contain p-1"
+            />
+          )}
           <button
             onClick={() => setActiveCell(null)}
-            className="text-white/40"
+            className="absolute right-3 top-3 text-white/40"
           >
             <X size={20} />
           </button>

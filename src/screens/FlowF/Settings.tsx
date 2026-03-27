@@ -7,6 +7,8 @@ export const SettingsScreen = () => {
   const navigate = useNavigate();
   const [isDyslexiaMode, setIsDyslexiaMode] = useState(false);
   const [isHighContrast, setIsHighContrast] = useState(false);
+  const [pronunciationFocus, setPronunciationFocus] = useState<'British English (RP)' | 'American English'>('British English (RP)');
+  const [isAutoplayEnabled, setIsAutoplayEnabled] = useState(true);
 
   const Toggle = ({ active, onToggle }: { active: boolean, onToggle: () => void }) => (
     <button 
@@ -65,26 +67,32 @@ export const SettingsScreen = () => {
         <div className="flex flex-col gap-4">
           <h3 className="text-[12px] font-bold text-brand-gold uppercase tracking-wider px-1">LEARNING</h3>
           <div className="bg-white rounded-[20px] border border-[#DDDDDD] overflow-hidden">
-            <button className="w-full p-4 flex items-center justify-between active:bg-brand-offwhite transition-colors">
+            <button
+              onClick={() => setPronunciationFocus(current => current === 'British English (RP)' ? 'American English' : 'British English (RP)')}
+              className="w-full p-4 flex items-center justify-between active:bg-brand-offwhite transition-colors"
+            >
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-[12px] bg-brand-navy/5 flex items-center justify-center">
                   <Globe size={20} className="text-brand-navy" />
                 </div>
                 <div className="flex flex-col text-left">
                   <span className="text-[15px] font-bold text-brand-navy">Pronunciation Focus</span>
-                  <span className="text-[11px] text-brand-muted">British English (RP)</span>
+                  <span className="text-[11px] text-brand-muted">{pronunciationFocus}</span>
                 </div>
               </div>
               <ChevronRight size={18} className="text-brand-muted" />
             </button>
-            <button className="w-full p-4 flex items-center justify-between border-t border-[#EEEEEE] active:bg-brand-offwhite transition-colors">
+            <button
+              onClick={() => setIsAutoplayEnabled(current => !current)}
+              className="w-full p-4 flex items-center justify-between border-t border-[#EEEEEE] active:bg-brand-offwhite transition-colors"
+            >
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-[12px] bg-brand-navy/5 flex items-center justify-center">
                   <Volume2 size={20} className="text-brand-navy" />
                 </div>
                 <div className="flex flex-col text-left">
                   <span className="text-[15px] font-bold text-brand-navy">Audio Settings</span>
-                  <span className="text-[11px] text-brand-muted">Auto-play sounds enabled</span>
+                  <span className="text-[11px] text-brand-muted">{isAutoplayEnabled ? 'Auto-play sounds enabled' : 'Auto-play sounds disabled'}</span>
                 </div>
               </div>
               <ChevronRight size={18} className="text-brand-muted" />
@@ -96,7 +104,10 @@ export const SettingsScreen = () => {
         <div className="flex flex-col gap-4">
           <h3 className="text-[12px] font-bold text-brand-gold uppercase tracking-wider px-1">LEGAL</h3>
           <div className="bg-white rounded-[20px] border border-[#DDDDDD] overflow-hidden">
-            <button className="w-full p-4 flex items-center justify-between active:bg-brand-offwhite transition-colors">
+            <button
+              onClick={() => navigate('/help')}
+              className="w-full p-4 flex items-center justify-between active:bg-brand-offwhite transition-colors"
+            >
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-[12px] bg-brand-navy/5 flex items-center justify-center">
                   <Shield size={20} className="text-brand-navy" />
@@ -105,7 +116,10 @@ export const SettingsScreen = () => {
               </div>
               <ChevronRight size={18} className="text-brand-muted" />
             </button>
-            <button className="w-full p-4 flex items-center justify-between border-t border-[#EEEEEE] active:bg-brand-offwhite transition-colors">
+            <button
+              onClick={() => navigate('/privacy')}
+              className="w-full p-4 flex items-center justify-between border-t border-[#EEEEEE] active:bg-brand-offwhite transition-colors"
+            >
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-[12px] bg-brand-navy/5 flex items-center justify-center">
                   <Shield size={20} className="text-brand-navy" />

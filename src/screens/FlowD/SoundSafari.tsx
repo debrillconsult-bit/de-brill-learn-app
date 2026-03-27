@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { StatusBar } from '@/src/components/Layout';
 import { X, Volume2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { getSoundPrompt, speakText, stopSpeaking } from '@/src/lib/speech';
 
 const animals = [
   { id: 1, name: 'Lion', sound: '/l/', icon: '🦁' },
@@ -19,6 +20,15 @@ export const SoundSafari = () => {
   const [score, setScore] = useState(0);
 
   const target = animals[targetIndex];
+  const targetPrompt = getSoundPrompt(target.sound);
+
+  React.useEffect(() => {
+    void speakText(targetPrompt);
+
+    return () => {
+      stopSpeaking();
+    };
+  }, [targetPrompt]);
 
   const handleSelect = (id: number) => {
     if (feedback) return;
@@ -72,7 +82,11 @@ export const SoundSafari = () => {
         {/* Target Sound */}
         <div className="flex flex-col items-center gap-4">
           <p className="text-brand-muted text-[14px] font-medium">Find the animal that starts with:</p>
-          <button className="w-32 h-32 rounded-full bg-brand-navy flex items-center justify-center text-white shadow-xl active:scale-95 transition-transform">
+          <button
+            type="button"
+            onClick={() => void speakText(targetPrompt)}
+            className="w-32 h-32 rounded-full bg-brand-navy flex items-center justify-center text-white shadow-xl active:scale-95 transition-transform"
+          >
             <div className="flex flex-col items-center gap-1">
               <span className="text-[40px] font-bold text-brand-gold">{target.sound}</span>
               <Volume2 size={24} />

@@ -4,6 +4,7 @@ import { StatusBar } from '@/src/components/Layout';
 import { X, Volume2, ChevronRight, ChevronLeft } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
+import { speakText, stopSpeaking } from '@/src/lib/speech';
 
 const words = [
   { word: 'Black', ipa: '/blæk/', meaning: 'The darkest colour, like coal or night.', sentence: 'The cat is black.' },
@@ -19,6 +20,13 @@ export const LessonWords = () => {
   const [isBritish, setIsBritish] = React.useState(true);
 
   const currentWord = words[currentIndex];
+  const voiceLang = isBritish ? 'en-GB' : 'en-US';
+
+  React.useEffect(() => () => stopSpeaking(), []);
+
+  const speakCurrentWord = () => {
+    void speakText(currentWord.word, { lang: voiceLang });
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-brand-offwhite">
@@ -71,7 +79,13 @@ export const LessonWords = () => {
                   <>
                     <h3 className="text-[32px] font-bold mb-2">{currentWord.word}</h3>
                     <span className="text-[18px] font-ipa text-brand-gold mb-8">{currentWord.ipa}</span>
-                    <button className="w-16 h-16 rounded-full bg-brand-gold flex items-center justify-center shadow-lg active:scale-95 transition-transform">
+                    <button
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        speakCurrentWord();
+                      }}
+                      className="w-16 h-16 rounded-full bg-brand-gold flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+                    >
                       <Volume2 size={32} className="text-brand-navy" />
                     </button>
                     <span className="mt-8 text-[10px] text-brand-muted uppercase font-bold tracking-widest">Tap to flip</span>

@@ -1,4 +1,4 @@
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { SplashScreen } from './screens/FlowA/SplashScreen';
 import { WelcomeCarousel } from './screens/FlowA/WelcomeCarousel';
 import { RoleSelection } from './screens/FlowA/RoleSelection';
@@ -24,6 +24,7 @@ import { SoundChart } from './screens/FlowB/SoundChart';
 import { PracticeMenu } from './screens/FlowD/PracticeMenu';
 import { SoundSafari } from './screens/FlowD/SoundSafari';
 import { BlendBridge } from './screens/FlowD/BlendBridge';
+import { GamePlaceholder } from './screens/FlowD/GamePlaceholder';
 import { ProgressDashboard } from './screens/FlowE/ProgressDashboard';
 import { AchievementGallery } from './screens/FlowE/AchievementGallery';
 import { StudentProfile } from './screens/FlowF/StudentProfile';
@@ -52,7 +53,8 @@ export default function App() {
       <div className="max-w-[390px] mx-auto bg-white min-h-screen shadow-2xl relative flex flex-col">
         <div className="flex-1 flex flex-col overflow-hidden">
           <Routes>
-            <Route path="/welcome" element={<div>Welcome Screen</div>} />
+            <Route path="/" element={<SplashScreen />} />
+            <Route path="/welcome" element={<WelcomeCarousel />} />
             <Route path="/role-selection" element={<RoleSelection />} />
             <Route path="/account-creation" element={<AccountCreation />} />
             <Route path="/email-verification" element={<EmailVerification />} />
@@ -82,7 +84,7 @@ export default function App() {
             <Route path="/practice" element={<PracticeMenu />} />
             <Route path="/game/safari" element={<SoundSafari />} />
             <Route path="/game/bridge" element={<BlendBridge />} />
-            <Route path="/game/:id" element={<Placeholder name="Game Screen (D-04 to D-07)" />} />
+            <Route path="/game/:id" element={<GamePlaceholder />} />
             
             {/* Flow E: Progress & Stats */}
             <Route path="/progress" element={<ProgressDashboard />} />
@@ -97,6 +99,8 @@ export default function App() {
             {/* Flow G: Teacher Portal */}
             <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
             <Route path="/teacher/portal" element={<TeacherWebPortal />} />
+            <Route path="/admin" element={<TeacherWebPortal />} />
+            <Route path="/admin/dashboard" element={<TeacherWebPortal />} />
             <Route path="/teacher/class/:id" element={<ClassManagement />} />
             <Route path="/teacher/analytics" element={<Placeholder name="Analytics" />} />
             <Route path="/teacher/resources" element={<Placeholder name="Resources" />} />

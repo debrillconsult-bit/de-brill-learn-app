@@ -6,6 +6,16 @@ import { motion } from 'motion/react';
 
 export const LessonCompletion = () => {
   const navigate = useNavigate();
+  const handleShare = async () => {
+    const shareText = "I've completed Unit 4 on De-Brill Learn.";
+
+    if (navigator.share) {
+      await navigator.share({ text: shareText });
+      return;
+    }
+
+    await navigator.clipboard.writeText(shareText);
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-brand-navy relative overflow-hidden">
@@ -73,10 +83,16 @@ export const LessonCompletion = () => {
         </button>
         
         <div className="flex gap-4">
-          <button className="flex-1 h-12 bg-white/10 text-white rounded-[20px] font-bold text-[14px] flex items-center justify-center gap-2 border border-white/10">
+          <button
+            onClick={() => navigate('/lesson/warmup')}
+            className="flex-1 h-12 bg-white/10 text-white rounded-[20px] font-bold text-[14px] flex items-center justify-center gap-2 border border-white/10"
+          >
             <RotateCcw size={18} /> Review
           </button>
-          <button className="flex-1 h-12 bg-white/10 text-white rounded-[20px] font-bold text-[14px] flex items-center justify-center gap-2 border border-white/10">
+          <button
+            onClick={() => void handleShare()}
+            className="flex-1 h-12 bg-white/10 text-white rounded-[20px] font-bold text-[14px] flex items-center justify-center gap-2 border border-white/10"
+          >
             <Share2 size={18} /> Share
           </button>
         </div>

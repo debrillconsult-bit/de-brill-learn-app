@@ -4,20 +4,87 @@ import { StatusBar } from '@/src/components/Layout';
 import { X, Mic, ChevronRight, Volume2, Sparkles } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { motion } from 'motion/react';
+import { speakText, stopSpeaking } from '@/src/lib/speech';
 
 export const LessonPractice = () => {
   const navigate = useNavigate();
   const [isRecording, setIsRecording] = React.useState(false);
   const [showFeedback, setShowFeedback] = React.useState(false);
+  const [recordingError, setRecordingError] = React.useState<string | null>(null);
+  const [hasRecording, setHasRecording] = React.useState(false);
+  const practiceSentence = 'The black cat sat on a blue mat.';
+  const practiceIpa = '/the black cat sat on a blue mat/';
+  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = React.useRef<MediaStream | null>(null);
+  const recordingTimeoutRef = React.useRef<number | null>(null);
+  const audioChunksRef = React.useRef<Blob[]>([]);
 
-  const toggleRecording = () => {
-    if (!isRecording) {
-      setIsRecording(true);
+  React.useEffect(() => {
+    return () => {
+      stopSpeaking();
+      if (recordingTimeoutRef.current) {
+        window.clearTimeout(recordingTimeoutRef.current);
+      }
+      mediaRecorderRef.current?.stop();
+      mediaStreamRef.current?.getTracks().forEach(track => track.stop());
+    };
+  }, []);
+
+  const stopRecording = () => {
+    if (recordingTimeoutRef.current) {
+      window.clearTimeout(recordingTimeoutRef.current);
+      recordingTimeoutRef.current = null;
+    }
+
+    mediaRecorderRef.current?.stop();
+  };
+
+  const toggleRecording = async () => {
+    if (isRecording) {
+      stopRecording();
+      return;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      setRecordingError('Recording is not supported on this device.');
+      return;
+    }
+
+    try {
+      setRecordingError(null);
       setShowFeedback(false);
-      setTimeout(() => {
+      setHasRecording(false);
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      mediaStreamRef.current = stream;
+      mediaRecorderRef.current = recorder;
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = event => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const didCaptureAudio = audioChunksRef.current.length > 0;
         setIsRecording(false);
-        setShowFeedback(true);
+        setHasRecording(didCaptureAudio);
+        setShowFeedback(didCaptureAudio);
+        mediaStreamRef.current?.getTracks().forEach(track => track.stop());
+        mediaStreamRef.current = null;
+        mediaRecorderRef.current = null;
+      };
+
+      recorder.start();
+      setIsRecording(true);
+      recordingTimeoutRef.current = window.setTimeout(() => {
+        stopRecording();
       }, 3000);
+    } catch {
+      setRecordingError('Microphone access was blocked. Please allow microphone permission and try again.');
+      setIsRecording(false);
     }
   };
 
@@ -47,11 +114,14 @@ export const LessonPractice = () => {
         {/* Drill Content */}
         <div className="bg-white rounded-[24px] border border-[#DDDDDD] p-8 flex flex-col items-center gap-6 text-center shadow-sm">
           <div className="flex flex-col gap-2">
-            <h3 className="text-[22px] font-bold text-brand-navy">The black cat sat on a blue mat.</h3>
-            <span className="text-[16px] font-ipa text-brand-muted">/ðə blæk kæt sæt ɒn ə bluː mæt/</span>
+            <h3 className="text-[22px] font-bold text-brand-navy">{practiceSentence}</h3>
+            <span className="text-[16px] font-ipa text-brand-muted">{practiceIpa}</span>
           </div>
 
-          <button className="text-brand-gold font-bold text-[13px] flex items-center gap-2 hover:underline">
+          <button
+            onClick={() => void speakText(practiceSentence)}
+            className="text-brand-gold font-bold text-[13px] flex items-center gap-2 hover:underline"
+          >
             <Volume2 size={18} /> Hear Model Pronunciation
           </button>
 
@@ -78,11 +148,16 @@ export const LessonPractice = () => {
               </div>
             )}
           </div>
+          {recordingError && (
+            <p className="text-[12px] text-[#B71C1C] leading-relaxed">{recordingError}</p>
+          )}
+          {hasRecording && !recordingError && (
+            <p className="text-[12px] text-[#2E7D32] leading-relaxed">Voice captured successfully.</p>
+          )}
 
           {/* Record Button */}
           <button 
             onClick={toggleRecording}
-            disabled={isRecording}
             className={cn(
               "w-20 h-20 rounded-full flex items-center justify-center transition-all shadow-xl active:scale-95",
               isRecording ? "bg-brand-navy" : "bg-brand-gold"

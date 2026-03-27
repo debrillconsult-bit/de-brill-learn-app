@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { StatusBar } from '@/src/components/Layout';
 import { X, Volume2, ChevronRight, Play, Pause } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
+import { speakText, stopSpeaking } from '@/src/lib/speech';
 
 export const LessonStory = () => {
   const navigate = useNavigate();
@@ -11,6 +12,54 @@ export const LessonStory = () => {
 
   const storyText = "The black cat sat on a blue mat. It had a sharp blade. The cat saw a drop of blood. It was a brave cat.";
   const words = storyText.split(' ');
+
+  React.useEffect(() => () => stopSpeaking(), []);
+
+  const getWordAtCharIndex = React.useCallback((charIndex: number) => {
+    let currentStart = 0;
+
+    for (let index = 0; index < words.length; index += 1) {
+      const word = words[index];
+      const currentEnd = currentStart + word.length;
+
+      if (charIndex >= currentStart && charIndex < currentEnd) {
+        return index;
+      }
+
+      currentStart = currentEnd + 1;
+    }
+
+    return null;
+  }, [words]);
+
+  const speakWord = (word: string, index: number) => {
+    setActiveWordIndex(index);
+    void speakText(word, {
+      onEnd: () => setActiveWordIndex(null),
+    });
+  };
+
+  const handleReadAlong = () => {
+    if (isPlaying) {
+      setIsPlaying(false);
+      stopSpeaking();
+      return;
+    }
+
+    setIsPlaying(true);
+    void speakText(storyText, {
+      rate: 0.75,
+      onBoundary: event => {
+        if (event.name === 'word') {
+          setActiveWordIndex(getWordAtCharIndex(event.charIndex));
+        }
+      },
+      onEnd: () => {
+        setIsPlaying(false);
+        setActiveWordIndex(null);
+      },
+    });
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-brand-offwhite">
@@ -58,7 +107,7 @@ export const LessonStory = () => {
             {words.map((word, i) => (
               <button
                 key={i}
-                onClick={() => setActiveWordIndex(i)}
+                onClick={() => speakWord(word, i)}
                 className={cn(
                   "text-[18px] leading-relaxed transition-colors px-1 rounded-sm",
                   activeWordIndex === i ? "bg-brand-gold text-brand-navy font-bold" : "text-brand-navy"
@@ -72,7 +121,7 @@ export const LessonStory = () => {
           <div className="flex items-center justify-between pt-4 border-t border-[#EEEEEE]">
             <div className="flex items-center gap-3">
               <button 
-                onClick={() => setIsPlaying(!isPlaying)}
+                onClick={handleReadAlong}
                 className="w-12 h-12 rounded-full bg-brand-gold flex items-center justify-center text-brand-navy shadow-md active:scale-95 transition-transform"
               >
                 {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
@@ -83,7 +132,10 @@ export const LessonStory = () => {
               </div>
             </div>
             
-            <button className="text-brand-gold font-bold text-[12px] flex items-center gap-1">
+            <button
+              onClick={() => void speakText(storyText, { rate: 0.65 })}
+              className="text-brand-gold font-bold text-[12px] flex items-center gap-1"
+            >
               <Volume2 size={16} /> Slow Mode
             </button>
           </div>
