@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, BookOpen, Gamepad2, BarChart3, UserCircle } from 'lucide-react';
+import { Home, BookOpen, Gamepad2, UserCircle, Volume2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
 export const BottomNav = () => {
@@ -8,7 +8,7 @@ export const BottomNav = () => {
     { id: 'home', label: 'Home', icon: Home, path: '/home-student' },
     { id: 'library', label: 'Library', icon: BookOpen, path: '/library' },
     { id: 'practice', label: 'Practice', icon: Gamepad2, path: '/practice' },
-    { id: 'sounds', label: 'Sounds', icon: BookOpen, path: '/sound-chart' },
+    { id: 'sounds', label: 'Sounds', icon: Volume2, path: '/sound-chart' },
     { id: 'profile', label: 'Profile', icon: UserCircle, path: '/profile' },
   ];
 
