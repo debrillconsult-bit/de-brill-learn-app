@@ -188,7 +188,26 @@ export const AccountCreation = () => {
             });
 
             if (!result.success) {
-              setEmailError(result.error || 'Registration failed');
+              const errorMessage = result.error || '';
+
+              if (
+                errorMessage.includes('fetch') ||
+                errorMessage.includes('network') ||
+                errorMessage.includes('Failed')
+              ) {
+                setEmailError(
+                  'Connection error. Please check your internet connection and try again.'
+                );
+              } else if (errorMessage.includes('already')) {
+                setEmailError(
+                  'An account with this email already exists. Please log in instead.'
+                );
+              } else {
+                setEmailError(
+                  errorMessage || 'Registration failed. Try again.'
+                );
+              }
+              console.error('Registration error:', result.error);
               return;
             }
 

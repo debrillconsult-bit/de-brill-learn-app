@@ -1,7 +1,7 @@
 import React from 'react';
 import { supabase } from './supabase';
 import type { Profile } from './supabase';
-import { getCurrentProfile } from './supabaseAuth';
+import { getCurrentProfile, testSupabaseConnection } from './supabaseAuth';
 
 interface AuthContextType {
   user: Profile | null;
@@ -29,6 +29,10 @@ export const AuthProvider = ({
     React.useState(true);
 
   React.useEffect(() => {
+    testSupabaseConnection().then(ok => {
+      console.log('Supabase connection:', ok ? 'OK' : 'FAILED');
+    });
+
     const timeoutId = window.setTimeout(() => {
       setIsLoading(false);
     }, 5000);

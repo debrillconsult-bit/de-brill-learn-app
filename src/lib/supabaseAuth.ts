@@ -16,6 +16,25 @@ export interface AuthResult {
   user?: Profile;
 }
 
+export async function testSupabaseConnection():
+  Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('profiles')
+      .select('count')
+      .limit(1);
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Supabase connection test failed:', error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('Supabase unreachable:', err);
+    return false;
+  }
+}
+
 export async function registerWithSupabase(
   data: RegisterData
 ): Promise<AuthResult> {
@@ -66,9 +85,10 @@ export async function registerWithSupabase(
 
     return { success: true };
   } catch (err) {
+    const message = err instanceof Error ? err.message : 'Registration failed. Try again.';
     return {
       success: false,
-      error: 'Registration failed. Try again.'
+      error: message
     };
   }
 }
