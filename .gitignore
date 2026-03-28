@@ -8,3 +8,4 @@ coverage/
 !.env.example
 server/dist/
 .vercel/
+android/app/release/

@@ -2,13 +2,19 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StatusBar, DiagonalHeader } from '@/src/components/Layout';
 import { ArrowLeft, Globe, Eye, Volume2, Shield, ChevronRight } from 'lucide-react';
+import {
+  getAutoplayEnabled,
+  getPronunciationFocus,
+  setAutoplayEnabled,
+  setPronunciationFocus,
+} from '@/src/lib/speech';
 
 export const SettingsScreen = () => {
   const navigate = useNavigate();
   const [isDyslexiaMode, setIsDyslexiaMode] = useState(false);
   const [isHighContrast, setIsHighContrast] = useState(false);
-  const [pronunciationFocus, setPronunciationFocus] = useState<'British English (RP)' | 'American English'>('British English (RP)');
-  const [isAutoplayEnabled, setIsAutoplayEnabled] = useState(true);
+  const [pronunciationFocus, updatePronunciationFocus] = useState<'British English (RP)' | 'American English'>(getPronunciationFocus);
+  const [isAutoplayEnabled, updateAutoplayEnabled] = useState(getAutoplayEnabled);
 
   const Toggle = ({ active, onToggle }: { active: boolean, onToggle: () => void }) => (
     <button 
@@ -68,7 +74,11 @@ export const SettingsScreen = () => {
           <h3 className="text-[12px] font-bold text-brand-gold uppercase tracking-wider px-1">LEARNING</h3>
           <div className="bg-white rounded-[20px] border border-[#DDDDDD] overflow-hidden">
             <button
-              onClick={() => setPronunciationFocus(current => current === 'British English (RP)' ? 'American English' : 'British English (RP)')}
+              onClick={() => {
+                const nextValue = pronunciationFocus === 'British English (RP)' ? 'American English' : 'British English (RP)';
+                updatePronunciationFocus(nextValue);
+                setPronunciationFocus(nextValue);
+              }}
               className="w-full p-4 flex items-center justify-between active:bg-brand-offwhite transition-colors"
             >
               <div className="flex items-center gap-4">
@@ -83,7 +93,11 @@ export const SettingsScreen = () => {
               <ChevronRight size={18} className="text-brand-muted" />
             </button>
             <button
-              onClick={() => setIsAutoplayEnabled(current => !current)}
+              onClick={() => {
+                const nextValue = !isAutoplayEnabled;
+                updateAutoplayEnabled(nextValue);
+                setAutoplayEnabled(nextValue);
+              }}
               className="w-full p-4 flex items-center justify-between border-t border-[#EEEEEE] active:bg-brand-offwhite transition-colors"
             >
               <div className="flex items-center gap-4">
