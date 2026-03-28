@@ -2,9 +2,11 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StatusBar, DiagonalHeader } from '@/src/components/Layout';
 import { Settings, LogOut, ChevronRight, Shield, Bell, HelpCircle, User } from 'lucide-react';
+import { useAuth } from '@/src/lib/AuthContext';
 
 export const StudentProfile = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   return (
     <div className="flex-1 flex flex-col bg-brand-offwhite overflow-y-auto pb-20">
@@ -60,7 +62,7 @@ export const StudentProfile = () => {
           <div className="bg-white rounded-[20px] border border-[#DDDDDD] overflow-hidden">
             {[
               { label: 'Help Center', icon: HelpCircle, route: '/help' },
-              { label: 'About De-Brill Learn', icon: User, route: '/settings' }, // TODO: add /about route when ready
+              { label: 'About De-Brill Learn', icon: User, route: '/about' },
             ].map((item, i, arr) => (
               <button 
                 key={i}
@@ -83,7 +85,13 @@ export const StudentProfile = () => {
         </div>
 
         {/* Logout Button */}
-        <button className="bg-red-50 text-red-600 rounded-[20px] p-4 flex items-center justify-center gap-3 font-bold active:bg-red-100 transition-colors">
+        <button
+          onClick={() => {
+            logout();
+            navigate('/');
+          }}
+          className="bg-red-50 text-red-600 rounded-[20px] p-4 flex items-center justify-center gap-3 font-bold active:bg-red-100 transition-colors"
+        >
           <LogOut size={20} />
           <span>Log Out</span>
         </button>

@@ -182,7 +182,7 @@ export const WelcomeCarousel = () => {
         </Button>
         <button 
           className="text-brand-navy font-bold text-[14px]"
-          onClick={() => navigate('/welcome')} // TODO: replace with /login when auth flow is built
+          onClick={() => navigate('/login')}
         >
           Already have an account? Log in
         </button>

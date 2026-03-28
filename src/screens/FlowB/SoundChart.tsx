@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { StatusBar, DiagonalHeader } from '@/src/components/Layout';
 import { Volume2, X } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
-import { getSoundPrompt, speakText, stopSpeaking } from '@/src/lib/speech';
+import { getSoundPrompt } from '@/src/lib/speech';
 
 interface SoundCell {
   symbol: string;
@@ -140,15 +140,101 @@ export const SoundChart = () => {
   const [activeTab, setActiveTab] = React.useState<'vowels' | 'consonants'>('vowels');
   const activeDiagram = activeCell ? speechOrganBySymbol[activeCell.symbol] : null;
 
-  React.useEffect(() => () => stopSpeaking(), []);
+  React.useEffect(() => () => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+  }, []);
+
+  const tryApiTTS = async (text: string) => {
+    try {
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) return;
+      const data = await res.json() as { text?: string };
+      if (!('speechSynthesis' in window)) return;
+      const synth = window.speechSynthesis;
+      const utterance = new SpeechSynthesisUtterance(data.text || text);
+      utterance.lang = 'en-GB';
+      utterance.rate = 0.85;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      synth.cancel();
+      synth.speak(utterance);
+    } catch {
+      console.warn('TTS fallback failed for:', text);
+    }
+  };
+
+  const speak = async (text: string) => {
+    const synth = window.speechSynthesis;
+
+    if (synth) {
+      synth.cancel();
+
+      const trySpeak = () => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-GB';
+        utterance.rate = 0.85;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+
+        const voices = synth.getVoices();
+        const britishVoice = voices.find(v =>
+          v.lang === 'en-GB' ||
+          v.lang.startsWith('en-GB') ||
+          v.name.toLowerCase().includes('british') ||
+          v.name.includes('Daniel') ||
+          v.name.includes('Kate') ||
+          v.name.includes('Serena')
+        );
+        if (britishVoice) {
+          utterance.voice = britishVoice;
+        }
+
+        utterance.onerror = () => {
+          void tryApiTTS(text);
+        };
+
+        synth.speak(utterance);
+
+        window.setTimeout(() => {
+          if (!synth.speaking && !synth.pending) {
+            void tryApiTTS(text);
+          }
+        }, 1000);
+      };
+
+      if (synth.getVoices().length === 0) {
+        synth.onvoiceschanged = () => {
+          synth.onvoiceschanged = null;
+          trySpeak();
+        };
+        window.setTimeout(() => {
+          if (synth.getVoices().length === 0) {
+            void tryApiTTS(text);
+          }
+        }, 2000);
+      } else {
+        trySpeak();
+      }
+    } else {
+      await tryApiTTS(text);
+    }
+  };
 
   const handleTap = (cell: SoundCell) => {
     setActiveCell(cell);
-    void speakText(getSoundPrompt(cell.symbol, cell.word));
+    void speak(getSoundPrompt(cell.symbol, cell.word));
   };
 
   const handleWordTap = (word: string) => {
-    void speakText(word);
+    void speak(word);
   };
 
   return (

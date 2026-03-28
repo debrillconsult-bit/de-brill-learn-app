@@ -63,7 +63,7 @@ export const SplashScreen = () => {
         </button>
         <button
           className="w-full h-12 border-2 border-brand-navy rounded-[20px] text-brand-navy font-bold text-[14px]"
-          onClick={(e) => { e.stopPropagation(); navigate('/welcome'); /* TODO: replace with /login when auth flow is built */ }}
+          onClick={(e) => { e.stopPropagation(); navigate('/login'); }}
         >
           Log in
         </button>

@@ -1,11 +1,31 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { StatusBar, DiagonalHeader } from '@/src/components/Layout';
 import { Button } from '@/src/components/Button';
 import { Mail } from 'lucide-react';
 
 export const EmailVerification = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleContinue = () => {
+    const roleFromState = (location.state as { role?: string } | null)?.role;
+    const role = roleFromState || localStorage.getItem('debrilllearn_pending_role') || 'student';
+
+    switch (role) {
+      case 'child':
+        navigate('/profile-setup-child');
+        break;
+      case 'teacher':
+        navigate('/profile-setup-teacher');
+        break;
+      case 'parent':
+        navigate('/home-student');
+        break;
+      default:
+        navigate('/profile-setup-child');
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-brand-offwhite">
@@ -22,6 +42,9 @@ export const EmailVerification = () => {
           <p className="text-brand-mid text-[14px] leading-relaxed px-4">
             We've sent a verification link to <span className="font-bold text-brand-navy">dbrillconcept@gmail.com</span>. Please click the link to verify your account.
           </p>
+          <p className="text-[11px] text-brand-muted text-center mt-2 px-6">
+            For this demo, no email is sent. Tap below to continue setting up your profile.
+          </p>
         </div>
 
         <button className="text-brand-gold font-bold text-[14px] hover:underline">
@@ -30,8 +53,8 @@ export const EmailVerification = () => {
       </div>
 
       <div className="p-6 pb-8 flex flex-col gap-4">
-        <Button fullWidth onClick={() => navigate('/profile-setup-child')}>
-          I've verified my email
+        <Button fullWidth onClick={handleContinue}>
+          Continue Setup
         </Button>
         <Button variant="outline" fullWidth onClick={() => navigate(-1)}>
           Back

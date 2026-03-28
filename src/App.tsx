@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { SplashScreen } from './screens/FlowA/SplashScreen';
 import { WelcomeCarousel } from './screens/FlowA/WelcomeCarousel';
+import { LoginScreen } from './screens/FlowA/LoginScreen';
 import { RoleSelection } from './screens/FlowA/RoleSelection';
 import { AccountCreation } from './screens/FlowA/AccountCreation';
 import { EmailVerification } from './screens/FlowA/EmailVerification';
@@ -29,6 +30,10 @@ import { ProgressDashboard } from './screens/FlowE/ProgressDashboard';
 import { AchievementGallery } from './screens/FlowE/AchievementGallery';
 import { StudentProfile } from './screens/FlowF/StudentProfile';
 import { SettingsScreen } from './screens/FlowF/Settings';
+import { NotificationsScreen } from './screens/FlowF/Notifications';
+import { PrivacySecurityScreen } from './screens/FlowF/PrivacySecurity';
+import { HelpCenterScreen } from './screens/FlowF/HelpCenter';
+import { AboutScreen } from './screens/FlowF/About';
 import { TeacherDashboard } from './screens/FlowG/TeacherDashboard';
 import { ClassManagement } from './screens/FlowG/ClassManagement';
 import { TeacherWebPortal } from './screens/FlowG/TeacherWebPortal';
@@ -43,6 +48,7 @@ import { AdminUsersPage } from './features/admin/pages/Users';
 import { AdminContentPage } from './features/admin/pages/Content';
 import { AdminClassesPage } from './features/admin/pages/Classes';
 import { AdminAnalyticsPage } from './features/admin/pages/Analytics';
+import { AuthProvider } from './lib/AuthContext';
 
 const Placeholder = ({ name }: { name: string }) => (
   <div className="flex-1 flex flex-col bg-brand-offwhite">
@@ -69,6 +75,7 @@ const AppShell = () => {
         <Routes>
           <Route path="/" element={<SplashScreen />} />
           <Route path="/welcome" element={<WelcomeCarousel />} />
+          <Route path="/login" element={<LoginScreen />} />
           <Route path="/role-selection" element={<RoleSelection />} />
           <Route path="/account-creation" element={<AccountCreation />} />
           <Route path="/email-verification" element={<EmailVerification />} />
@@ -103,9 +110,10 @@ const AppShell = () => {
 
           <Route path="/profile" element={<StudentProfile />} />
           <Route path="/settings" element={<SettingsScreen />} />
-          <Route path="/notifications" element={<Placeholder name="Notifications" />} />
-          <Route path="/privacy" element={<Placeholder name="Privacy & Security" />} />
-          <Route path="/help" element={<Placeholder name="Help Center" />} />
+          <Route path="/notifications" element={<NotificationsScreen />} />
+          <Route path="/privacy" element={<PrivacySecurityScreen />} />
+          <Route path="/help" element={<HelpCenterScreen />} />
+          <Route path="/about" element={<AboutScreen />} />
 
           <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
           <Route path="/teacher/portal" element={<TeacherWebPortal />} />
@@ -147,8 +155,10 @@ const AppShell = () => {
 
 export default function App() {
   return (
-    <Router>
-      <AppShell />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <AppShell />
+      </Router>
+    </AuthProvider>
   );
 }

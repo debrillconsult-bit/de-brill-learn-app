@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { StatusBar, DiagonalHeader } from '@/src/components/Layout';
 import { Button } from '@/src/components/Button';
 import { Eye, EyeOff } from 'lucide-react';
+import { registerUser } from '@/src/lib/auth';
+import { useAuth } from '@/src/lib/AuthContext';
 
 export const AccountCreation = () => {
   const [searchParams] = useSearchParams();
@@ -10,9 +12,11 @@ export const AccountCreation = () => {
   const validRoles = ['student', 'child', 'teacher', 'parent'];
   const role = validRoles.includes(rawRole) ? rawRole : 'student';
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const [showPassword, setShowPassword] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
+  const [emailError, setEmailError] = React.useState('');
   const [formData, setFormData] = React.useState({
     fullName: '',
     email: '',
@@ -28,6 +32,9 @@ export const AccountCreation = () => {
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
+    if (name === 'email') {
+      setEmailError('');
+    }
   };
 
   const isFormValid = () => {
@@ -73,6 +80,11 @@ export const AccountCreation = () => {
             />
             {submitted && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && (
               <span className="text-[11px] text-red-500 mt-1 ml-1">Please enter a valid email address</span>
+            )}
+            {emailError && (
+              <span className="text-[11px] text-red-500 mt-1 ml-1">
+                {emailError}
+              </span>
             )}
           </div>
 
@@ -164,7 +176,25 @@ export const AccountCreation = () => {
           disabled={!isFormValid() && submitted}
           onClick={() => {
             setSubmitted(true);
-            if (isFormValid()) navigate('/email-verification');
+            if (!isFormValid()) return;
+
+            const result = registerUser({
+              fullName: formData.fullName,
+              email: formData.email,
+              password: formData.password,
+              role: role as 'student' | 'child' | 'teacher' | 'parent',
+              classLevel: formData.classLevel,
+              schoolName: formData.schoolName,
+            });
+
+            if (!result.success) {
+              setEmailError(result.error || 'Registration failed');
+              return;
+            }
+
+            setUser(null);
+            localStorage.setItem('debrilllearn_pending_role', role);
+            navigate('/email-verification', { state: { role } });
           }}
         >
           Create account
