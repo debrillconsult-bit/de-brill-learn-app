@@ -48,7 +48,7 @@ import { AdminUsersPage } from './features/admin/pages/Users';
 import { AdminContentPage } from './features/admin/pages/Content';
 import { AdminClassesPage } from './features/admin/pages/Classes';
 import { AdminAnalyticsPage } from './features/admin/pages/Analytics';
-import { AuthProvider } from './lib/AuthContext';
+import { AuthProvider, useAuth } from './lib/AuthContext';
 
 const Placeholder = ({ name }: { name: string }) => (
   <div className="flex-1 flex flex-col bg-brand-offwhite">
@@ -60,8 +60,26 @@ const Placeholder = ({ name }: { name: string }) => (
 
 const AppShell = () => {
   const location = useLocation();
+  const { isLoading } = useAuth();
   const isAdminRoute =
     location.pathname.startsWith('/admin') || location.pathname.startsWith('/teacher/portal');
+
+  if (isLoading) {
+    return (
+      <div className="max-w-[390px] mx-auto bg-white min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <img
+            src="/dbc-logo.png"
+            alt="De-Brill Learn"
+            className="w-20 h-20 object-contain animate-pulse"
+          />
+          <p className="text-[14px] text-brand-muted font-medium">
+            Loading...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

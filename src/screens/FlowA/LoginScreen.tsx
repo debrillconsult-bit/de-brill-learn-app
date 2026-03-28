@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { DiagonalHeader } from '@/src/components/Layout';
 import { Button } from '@/src/components/Button';
 import { Eye, EyeOff } from 'lucide-react';
-import { loginUser } from '@/src/lib/auth';
+import { loginWithSupabase } from '@/src/lib/supabaseAuth';
 import { useAuth } from '@/src/lib/AuthContext';
 
 export const LoginScreen = () => {
@@ -15,26 +15,26 @@ export const LoginScreen = () => {
   const [error, setError] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
       setError('Please enter your email and password.');
       return;
     }
     setIsLoading(true);
     setError('');
+    const result = await loginWithSupabase(
+      email, password
+    );
 
-    window.setTimeout(() => {
-      const result = loginUser(email, password);
+    if (!result.success) {
+      setError(result.error || 'Login failed.');
       setIsLoading(false);
+      return;
+    }
 
-      if (!result.success) {
-        setError(result.error || 'Login failed.');
-        return;
-      }
-
-      setUser(result.user!);
-
-      switch (result.user!.role) {
+    if (result.user) {
+      setUser(result.user as any);
+      switch (result.user.role) {
         case 'child':
           navigate('/home-child');
           break;
@@ -47,7 +47,8 @@ export const LoginScreen = () => {
         default:
           navigate('/home-student');
       }
-    }, 800);
+    }
+    setIsLoading(false);
   };
 
   return (

@@ -86,8 +86,8 @@ export const StudentProfile = () => {
 
         {/* Logout Button */}
         <button
-          onClick={() => {
-            logout();
+          onClick={async () => {
+            await logout();
             navigate('/');
           }}
           className="bg-red-50 text-red-600 rounded-[20px] p-4 flex items-center justify-center gap-3 font-bold active:bg-red-100 transition-colors"

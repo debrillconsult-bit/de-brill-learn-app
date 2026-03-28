@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { StatusBar, DiagonalHeader } from '@/src/components/Layout';
 import { Button } from '@/src/components/Button';
 import { Eye, EyeOff } from 'lucide-react';
-import { registerUser } from '@/src/lib/auth';
+import { registerWithSupabase } from '@/src/lib/supabaseAuth';
 import { useAuth } from '@/src/lib/AuthContext';
 
 export const AccountCreation = () => {
@@ -174,11 +174,11 @@ export const AccountCreation = () => {
         <Button
           fullWidth
           disabled={!isFormValid() && submitted}
-          onClick={() => {
+          onClick={async () => {
             setSubmitted(true);
             if (!isFormValid()) return;
 
-            const result = registerUser({
+            const result = await registerWithSupabase({
               fullName: formData.fullName,
               email: formData.email,
               password: formData.password,
