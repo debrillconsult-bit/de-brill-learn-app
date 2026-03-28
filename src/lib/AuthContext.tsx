@@ -29,7 +29,12 @@ export const AuthProvider = ({
     React.useState(true);
 
   React.useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setIsLoading(false);
+    }, 5000);
+
     getCurrentProfile().then(profile => {
+      clearTimeout(timeoutId);
       setUserState(profile);
       setIsLoading(false);
     });
@@ -46,7 +51,10 @@ export const AuthProvider = ({
         }
       );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(timeoutId);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const setUser = (u: Profile | null) => {

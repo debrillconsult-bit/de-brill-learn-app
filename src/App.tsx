@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { SplashScreen } from './screens/FlowA/SplashScreen';
 import { WelcomeCarousel } from './screens/FlowA/WelcomeCarousel';
@@ -57,6 +58,77 @@ const Placeholder = ({ name }: { name: string }) => (
     </div>
   </div>
 );
+
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: string }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: '' };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error: error.message };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div
+          style={{
+            padding: 24,
+            textAlign: 'center',
+            fontFamily: 'sans-serif',
+          }}
+        >
+          <img
+            src="/dbc-logo.png"
+            alt="De-Brill"
+            style={{
+              width: 80,
+              marginBottom: 16,
+            }}
+          />
+          <p
+            style={{
+              color: '#1B3A7A',
+              fontWeight: 'bold',
+            }}
+          >
+            Something went wrong.
+          </p>
+          <p
+            style={{
+              color: '#666',
+              fontSize: 13,
+              marginTop: 8,
+            }}
+          >
+            {this.state.error}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              marginTop: 16,
+              padding: '10px 24px',
+              background: '#F47920',
+              color: 'white',
+              border: 'none',
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 'bold',
+            }}
+          >
+            Tap to reload
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const AppShell = () => {
   const location = useLocation();
@@ -173,10 +245,12 @@ const AppShell = () => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <AppShell />
-      </Router>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <AppShell />
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
