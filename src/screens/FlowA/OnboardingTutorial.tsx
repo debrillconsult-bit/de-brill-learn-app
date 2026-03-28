@@ -49,7 +49,7 @@ export const OnboardingTutorial = () => {
         <span>/ɔɪ/</span><span>/θ/</span><span>/ʃ/</span><span>/tʃ/</span>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center gap-12 z-10">
+      <div className="flex-1 flex flex-col items-center justify-center p-8 pb-8 text-center gap-12 z-10">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
@@ -87,7 +87,7 @@ export const OnboardingTutorial = () => {
         </div>
       </div>
 
-      <div className="p-8 pb-12 z-10">
+      <div className="p-8 pb-8 z-10">
         <Button 
           fullWidth 
           onClick={() => {

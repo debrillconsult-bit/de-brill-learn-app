@@ -44,7 +44,7 @@ export const AccountCreation = () => {
       <StatusBar />
       <DiagonalHeader title="Create your account" />
 
-      <div className="flex-1 p-6 flex flex-col gap-6">
+      <div className="flex-1 p-6 pb-8 flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label className="text-[12px] font-bold text-brand-navy ml-1">FULL NAME</label>
@@ -158,7 +158,7 @@ export const AccountCreation = () => {
         </div>
       </div>
 
-      <div className="p-6 pb-12 flex flex-col gap-4 bg-white border-t border-[#DDDDDD]">
+      <div className="p-6 pb-8 flex flex-col gap-4 bg-white border-t border-[#DDDDDD]">
         <Button
           fullWidth
           disabled={!isFormValid() && submitted}

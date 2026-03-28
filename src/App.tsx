@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { SplashScreen } from './screens/FlowA/SplashScreen';
 import { WelcomeCarousel } from './screens/FlowA/WelcomeCarousel';
 import { RoleSelection } from './screens/FlowA/RoleSelection';
@@ -37,8 +37,13 @@ import { ChildProgressDetail } from './screens/FlowH/ChildProgressDetail';
 import { SubscriptionScreen } from './screens/FlowC/SubscriptionScreen';
 import { PaymentScreen } from './screens/FlowC/PaymentScreen';
 import { BottomNav } from './components/BottomNav';
+import { AdminLayout } from './features/admin/components/AdminLayout';
+import { AdminDashboardPage } from './features/admin/pages/Dashboard';
+import { AdminUsersPage } from './features/admin/pages/Users';
+import { AdminContentPage } from './features/admin/pages/Content';
+import { AdminClassesPage } from './features/admin/pages/Classes';
+import { AdminAnalyticsPage } from './features/admin/pages/Analytics';
 
-// Placeholder for other screens
 const Placeholder = ({ name }: { name: string }) => (
   <div className="flex-1 flex flex-col bg-brand-offwhite">
     <div className="flex-1 flex items-center justify-center p-8 text-center">
@@ -47,76 +52,86 @@ const Placeholder = ({ name }: { name: string }) => (
   </div>
 );
 
-export default function App() {
-  return (
-    <Router>
-      <div className="max-w-[390px] mx-auto bg-white min-h-screen shadow-2xl relative flex flex-col">
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Routes>
-            <Route path="/" element={<SplashScreen />} />
-            <Route path="/welcome" element={<WelcomeCarousel />} />
-            <Route path="/role-selection" element={<RoleSelection />} />
-            <Route path="/account-creation" element={<AccountCreation />} />
-            <Route path="/email-verification" element={<EmailVerification />} />
-            <Route path="/profile-setup-child" element={<ProfileSetupChild />} />
-            <Route path="/profile-setup-teacher" element={<ProfileSetupTeacher />} />
-            <Route path="/onboarding-tutorial" element={<OnboardingTutorial />} />
-            <Route path="/subscription" element={<SubscriptionScreen />} />
-            <Route path="/payment" element={<PaymentScreen />} />
+const AppShell = () => {
+  const location = useLocation();
+  const isAdminRoute =
+    location.pathname.startsWith('/admin') || location.pathname.startsWith('/teacher/portal');
 
-            {/* Flow B: Main Student App */}
-            <Route path="/home-child" element={<HomeChild />} />
-            <Route path="/home-student" element={<HomeStudent />} />
-            <Route path="/library" element={<BookLibrary />} />
-            <Route path="/book/:id" element={<BookDetail />} />
-            <Route path="/unit/:id" element={<UnitOverview />} />
-            <Route path="/lesson/warmup" element={<LessonWarmUp />} />
-            <Route path="/lesson/words" element={<LessonWords />} />
-            <Route path="/lesson/story" element={<LessonStory />} />
-            <Route path="/lesson/activities" element={<LessonActivities />} />
-            <Route path="/lesson/practice" element={<LessonPractice />} />
-            <Route path="/lesson/comprehension" element={<LessonComprehension />} />
-            <Route path="/lesson/completion" element={<LessonCompletion />} />
-            <Route path="/offline" element={<OfflineMode />} />
-            <Route path="/sound-chart" element={<SoundChart />} />
-            
-            {/* Flow D: Practice & Games */}
-            <Route path="/practice" element={<PracticeMenu />} />
-            <Route path="/game/safari" element={<SoundSafari />} />
-            <Route path="/game/bridge" element={<BlendBridge />} />
-            <Route path="/game/:id" element={<GamePlaceholder />} />
-            
-            {/* Flow E: Progress & Stats */}
-            <Route path="/progress" element={<ProgressDashboard />} />
-            <Route path="/achievements" element={<AchievementGallery />} />
-            
-            {/* Flow F: Profile & Settings */}
-            <Route path="/profile" element={<StudentProfile />} />
-            <Route path="/settings" element={<SettingsScreen />} />
-            <Route path="/notifications" element={<Placeholder name="Notifications" />} />
-            <Route path="/privacy" element={<Placeholder name="Privacy & Security" />} />
-            <Route path="/help" element={<Placeholder name="Help Center" />} />
-            {/* Flow G: Teacher Portal */}
-            <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
-            <Route path="/teacher/portal" element={<TeacherWebPortal />} />
-            <Route path="/admin" element={<TeacherWebPortal />} />
-            <Route path="/admin/dashboard" element={<TeacherWebPortal />} />
-            <Route path="/teacher/class/:id" element={<ClassManagement />} />
-            <Route path="/teacher/analytics" element={<Placeholder name="Analytics" />} />
-            <Route path="/teacher/resources" element={<Placeholder name="Resources" />} />
-            <Route path="/teacher/profile" element={<Placeholder name="Teacher Profile" />} />
-            
-            {/* Flow H: Parent Portal */}
-            <Route path="/parent/dashboard" element={<ParentDashboard />} />
-            <Route path="/parent/child/:id" element={<ChildProgressDetail />} />
-            <Route path="/parent/tips" element={<Placeholder name="Parenting Tips" />} />
-            <Route path="/parent/settings" element={<Placeholder name="Parent Settings" />} />
-            
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </div>
-        
-        {/* Only show BottomNav on student app screens */}
+  return (
+    <div
+      className={
+        isAdminRoute
+          ? 'min-h-screen bg-[#EEF3F8]'
+          : 'max-w-[390px] mx-auto bg-white min-h-screen shadow-2xl relative flex flex-col'
+      }
+    >
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Routes>
+          <Route path="/" element={<SplashScreen />} />
+          <Route path="/welcome" element={<WelcomeCarousel />} />
+          <Route path="/role-selection" element={<RoleSelection />} />
+          <Route path="/account-creation" element={<AccountCreation />} />
+          <Route path="/email-verification" element={<EmailVerification />} />
+          <Route path="/profile-setup-child" element={<ProfileSetupChild />} />
+          <Route path="/profile-setup-teacher" element={<ProfileSetupTeacher />} />
+          <Route path="/onboarding-tutorial" element={<OnboardingTutorial />} />
+          <Route path="/subscription" element={<SubscriptionScreen />} />
+          <Route path="/payment" element={<PaymentScreen />} />
+
+          <Route path="/home-child" element={<HomeChild />} />
+          <Route path="/home-student" element={<HomeStudent />} />
+          <Route path="/library" element={<BookLibrary />} />
+          <Route path="/book/:id" element={<BookDetail />} />
+          <Route path="/unit/:id" element={<UnitOverview />} />
+          <Route path="/lesson/warmup" element={<LessonWarmUp />} />
+          <Route path="/lesson/words" element={<LessonWords />} />
+          <Route path="/lesson/story" element={<LessonStory />} />
+          <Route path="/lesson/activities" element={<LessonActivities />} />
+          <Route path="/lesson/practice" element={<LessonPractice />} />
+          <Route path="/lesson/comprehension" element={<LessonComprehension />} />
+          <Route path="/lesson/completion" element={<LessonCompletion />} />
+          <Route path="/offline" element={<OfflineMode />} />
+          <Route path="/sound-chart" element={<SoundChart />} />
+
+          <Route path="/practice" element={<PracticeMenu />} />
+          <Route path="/game/safari" element={<SoundSafari />} />
+          <Route path="/game/bridge" element={<BlendBridge />} />
+          <Route path="/game/:id" element={<GamePlaceholder />} />
+
+          <Route path="/progress" element={<ProgressDashboard />} />
+          <Route path="/achievements" element={<AchievementGallery />} />
+
+          <Route path="/profile" element={<StudentProfile />} />
+          <Route path="/settings" element={<SettingsScreen />} />
+          <Route path="/notifications" element={<Placeholder name="Notifications" />} />
+          <Route path="/privacy" element={<Placeholder name="Privacy & Security" />} />
+          <Route path="/help" element={<Placeholder name="Help Center" />} />
+
+          <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+          <Route path="/teacher/portal" element={<TeacherWebPortal />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboardPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="content" element={<AdminContentPage />} />
+            <Route path="classes" element={<AdminClassesPage />} />
+            <Route path="analytics" element={<AdminAnalyticsPage />} />
+          </Route>
+          <Route path="/teacher/class/:id" element={<ClassManagement />} />
+          <Route path="/teacher/analytics" element={<Placeholder name="Analytics" />} />
+          <Route path="/teacher/resources" element={<Placeholder name="Resources" />} />
+          <Route path="/teacher/profile" element={<Placeholder name="Teacher Profile" />} />
+
+          <Route path="/parent/dashboard" element={<ParentDashboard />} />
+          <Route path="/parent/child/:id" element={<ChildProgressDetail />} />
+          <Route path="/parent/tips" element={<Placeholder name="Parenting Tips" />} />
+          <Route path="/parent/settings" element={<Placeholder name="Parent Settings" />} />
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+
+      {!isAdminRoute ? (
         <Routes>
           <Route path="/home-student" element={<BottomNav />} />
           <Route path="/library" element={<BottomNav />} />
@@ -125,7 +140,15 @@ export default function App() {
           <Route path="/profile" element={<BottomNav />} />
           <Route path="/sound-chart" element={<BottomNav />} />
         </Routes>
-      </div>
+      ) : null}
+    </div>
+  );
+};
+
+export default function App() {
+  return (
+    <Router>
+      <AppShell />
     </Router>
   );
 }

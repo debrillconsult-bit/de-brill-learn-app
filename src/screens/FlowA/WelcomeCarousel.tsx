@@ -113,7 +113,7 @@ export const WelcomeCarousel = () => {
         />
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center p-8 relative overflow-hidden">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center justify-center p-8 pb-8 relative">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
@@ -167,7 +167,7 @@ export const WelcomeCarousel = () => {
         </div>
       </div>
 
-      <div className="p-8 pb-12 flex flex-col gap-4">
+      <div className="p-8 pb-8 flex flex-col gap-4">
         <Button 
           fullWidth 
           onClick={() => {

@@ -13,7 +13,7 @@ export const ProfileSetupTeacher = () => {
       <StatusBar />
       <DiagonalHeader title="Teacher Profile Setup" accentColor="#2E7D32" />
       
-      <div className="flex-1 p-6 flex flex-col gap-6">
+      <div className="flex-1 p-6 pb-8 flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label className="text-[12px] font-bold text-brand-navy ml-1">SCHOOL NAME</label>
@@ -69,7 +69,7 @@ export const ProfileSetupTeacher = () => {
         </div>
       </div>
 
-      <div className="p-6 pb-12 flex flex-col gap-4 bg-white border-t border-[#DDDDDD]">
+      <div className="p-6 pb-8 flex flex-col gap-4 bg-white border-t border-[#DDDDDD]">
         <Button fullWidth onClick={() => navigate('/onboarding-tutorial')}>
           Complete Setup
         </Button>

@@ -43,7 +43,7 @@ export const RoleSelection = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="h-screen flex flex-col bg-brand-offwhite">
+    <div className="min-h-screen flex flex-col bg-brand-offwhite overflow-y-auto">
       <StatusBar />
       <DiagonalHeader title="Who is using the app?" />
       
@@ -68,7 +68,7 @@ export const RoleSelection = () => {
         ))}
       </div>
 
-      <div className="p-6 pb-12">
+      <div className="p-6 pb-8">
         <Button variant="outline" fullWidth onClick={() => navigate(-1)}>
           Back
         </Button>

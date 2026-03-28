@@ -8,11 +8,11 @@ export const EmailVerification = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="h-screen flex flex-col bg-brand-offwhite">
+    <div className="min-h-screen flex flex-col bg-brand-offwhite">
       <StatusBar />
       <DiagonalHeader title="Verify your email" />
       
-      <div className="flex-1 p-8 flex flex-col items-center justify-center text-center gap-8">
+      <div className="flex-1 p-8 pb-8 flex flex-col items-center justify-center text-center gap-8">
         <div className="w-24 h-24 bg-brand-gold/10 rounded-full flex items-center justify-center">
           <Mail size={48} className="text-brand-gold" />
         </div>
@@ -29,7 +29,7 @@ export const EmailVerification = () => {
         </button>
       </div>
 
-      <div className="p-6 pb-12 flex flex-col gap-4">
+      <div className="p-6 pb-8 flex flex-col gap-4">
         <Button fullWidth onClick={() => navigate('/profile-setup-child')}>
           I've verified my email
         </Button>

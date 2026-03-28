@@ -14,7 +14,7 @@ export const SplashScreen = () => {
 
   return (
     <div 
-      className="h-screen w-full bg-brand-navy flex flex-col cursor-pointer"
+      className="min-h-screen w-full bg-brand-navy flex flex-col cursor-pointer"
       onClick={() => navigate('/welcome')}
     >
       <StatusBar />
@@ -54,7 +54,7 @@ export const SplashScreen = () => {
       </div>
 
       {/* Bottom Surface */}
-      <div className="h-[30%] bg-white px-8 flex flex-col items-center justify-center gap-4">
+      <div className="h-[30%] bg-white px-8 pb-8 flex flex-col items-center justify-center gap-4">
         <button 
           className="w-full h-12 bg-[#F47920] rounded-[20px] text-brand-navy font-bold text-[14px]"
           onClick={(e) => { e.stopPropagation(); navigate('/welcome'); }}

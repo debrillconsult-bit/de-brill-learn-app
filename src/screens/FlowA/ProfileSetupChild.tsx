@@ -19,11 +19,11 @@ export const ProfileSetupChild = () => {
   const [isBritish, setIsBritish] = React.useState(true);
 
   return (
-    <div className="h-screen flex flex-col bg-brand-offwhite overflow-y-auto">
+    <div className="min-h-screen flex flex-col bg-brand-offwhite overflow-y-auto">
       <StatusBar />
       <DiagonalHeader title="Set up your profile" />
       
-      <div className="flex-1 p-6 flex flex-col gap-8">
+      <div className="flex-1 p-6 pb-8 flex flex-col gap-8">
         <div className="flex flex-col items-center gap-4">
           <div
             className="w-32 h-32 rounded-full border-4 border-brand-gold flex items-center justify-center"
@@ -80,7 +80,7 @@ export const ProfileSetupChild = () => {
         </div>
       </div>
 
-      <div className="p-6 pb-12 flex flex-col gap-4 bg-white border-t border-[#DDDDDD]">
+      <div className="p-6 pb-8 flex flex-col gap-4 bg-white border-t border-[#DDDDDD]">
         <Button fullWidth onClick={() => navigate('/onboarding-tutorial')}>
           Continue
         </Button>
