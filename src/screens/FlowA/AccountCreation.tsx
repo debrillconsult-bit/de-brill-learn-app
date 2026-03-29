@@ -212,6 +212,7 @@ export const AccountCreation = () => {
             }
 
             setUser(null);
+            localStorage.setItem('pendingRole', role);
             localStorage.setItem('debrilllearn_pending_role', role);
             navigate('/email-verification', { state: { role } });
           }}

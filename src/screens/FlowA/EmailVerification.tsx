@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { StatusBar, DiagonalHeader } from '@/src/components/Layout';
 import { Button } from '@/src/components/Button';
 import { Mail } from 'lucide-react';
@@ -7,23 +7,22 @@ import { Mail } from 'lucide-react';
 export const EmailVerification = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [warningShown, setWarningShown] =
+    React.useState(false);
 
   const handleContinue = () => {
-    const roleFromState = (location.state as { role?: string } | null)?.role;
-    const role = roleFromState || localStorage.getItem('debrilllearn_pending_role') || 'student';
-
-    switch (role) {
-      case 'child':
-        navigate('/profile-setup-child');
-        break;
-      case 'teacher':
-        navigate('/profile-setup-teacher');
-        break;
-      case 'parent':
-        navigate('/home-student');
-        break;
-      default:
-        navigate('/profile-setup-child');
+    if (!warningShown) {
+      setWarningShown(true);
+      return;
+    }
+    const role =
+      (location.state as any)?.role ||
+      localStorage.getItem('pendingRole') ||
+      'student';
+    if (role === 'teacher') {
+      navigate('/profile-setup-teacher');
+    } else {
+      navigate('/profile-setup-child');
     }
   };
 
@@ -43,8 +42,13 @@ export const EmailVerification = () => {
             We've sent a verification link to <span className="font-bold text-brand-navy">dbrillconcept@gmail.com</span>. Please click the link to verify your account.
           </p>
           <p className="text-[11px] text-brand-muted text-center mt-2 px-6">
-            For this demo, no email is sent. Tap below to continue setting up your profile.
+            A verification link has been sent to your email address. Please check your inbox and spam folder, then click the link to verify your account.
           </p>
+          {warningShown && (
+            <p className="text-[12px] text-[#F47920] text-center px-6 mt-2">
+              Please check your inbox and verify first. Tap again only if you want to skip verification.
+            </p>
+          )}
         </div>
 
         <button className="text-brand-gold font-bold text-[14px] hover:underline">
@@ -54,7 +58,9 @@ export const EmailVerification = () => {
 
       <div className="p-6 pb-8 flex flex-col gap-4">
         <Button fullWidth onClick={handleContinue}>
-          Continue Setup
+          {warningShown
+            ? 'Continue without verifying'
+            : 'I have verified my email'}
         </Button>
         <Button variant="outline" fullWidth onClick={() => navigate(-1)}>
           Back
