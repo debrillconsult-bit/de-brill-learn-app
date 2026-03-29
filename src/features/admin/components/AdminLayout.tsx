@@ -11,8 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ADMIN_ROLE_STORAGE_KEY, getStoredUserRole } from '@/src/features/admin/services/adminApi';
-import { supabase } from '../../../lib/supabase';
+import { useAuth } from '../../../lib/AuthContext';
 
 const navigation = [
   { label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard },
@@ -26,7 +25,7 @@ export const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const userRole = getStoredUserRole();
+  const { user, logout } = useAuth();
 
   React.useEffect(() => {
     setIsMenuOpen(false);
@@ -83,20 +82,19 @@ export const AdminLayout = () => {
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 font-bold">
                   AD
                 </div>
-                <div>
-                  <p className="text-[14px] font-bold">Admin Access</p>
-                  <p className="text-[12px] text-white/60">Role from localStorage</p>
+                <div className="flex flex-col gap-1">
+                  <span className="text-white font-bold text-[14px]">
+                    {user?.full_name || 'Admin'}
+                  </span>
+                  <span className="text-white/60 text-[11px]">
+                    {user?.email || 'Administrator'}
+                  </span>
                 </div>
               </div>
               <button
-                onClick={() => {
-                  localStorage.removeItem('debrilllearn_session');
-                  if (typeof window !== 'undefined') {
-                    window.localStorage.removeItem(ADMIN_ROLE_STORAGE_KEY);
-                  }
-                  supabase.auth.signOut().then(() => {
-                    navigate('/login');
-                  });
+                onClick={async () => {
+                  await logout();
+                  navigate('/login');
                 }}
                 className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#10244E] px-4 py-3 text-[13px] font-bold"
               >

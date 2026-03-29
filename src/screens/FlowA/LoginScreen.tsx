@@ -57,6 +57,9 @@ export const LoginScreen = () => {
       case 'parent':
         navigate('/parent/dashboard');
         break;
+      case 'admin':
+        navigate('/admin/dashboard');
+        break;
       default:
         navigate('/home-student');
     }
