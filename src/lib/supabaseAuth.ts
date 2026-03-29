@@ -104,17 +104,68 @@ export async function loginWithSupabase(
       'URL NOT FOUND'
     );
 
-    const { data, error } = await supabase.auth
-      .signInWithPassword({ email, password });
+    const supabaseUrl =
+      import.meta.env.VITE_SUPABASE_URL ||
+      'https://tmatdskpcunreyhheupp.supabase.co';
+    const supabaseAnonKey =
+      import.meta.env.VITE_SUPABASE_ANON_KEY ||
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtYXRkc2twY3VucmV5aGhldXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDY4NDIsImV4cCI6MjA5MDI4Mjg0Mn0.BB-5BaL0JBvf1wusylv6W0yb-u7roimO5vNp1g4cp6Q';
+    const controller = new AbortController();
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      12000
+    );
+
+    try {
+      await fetch(`${supabaseUrl}/auth/v1/health`, {
+        method: 'GET',
+        headers: {
+          apikey: supabaseAnonKey,
+        },
+        signal: controller.signal,
+      });
+    } catch (connectionError) {
+      clearTimeout(timeoutId);
+      const message =
+        connectionError instanceof Error
+          ? connectionError.message
+          : '';
+      if (
+        message === 'timeout' ||
+        message.includes('timeout') ||
+        message.includes('aborted') ||
+        message.includes('AbortError')
+      ) {
+        return {
+          success: false,
+          error: 'Connection timed out. Please check your internet and try again.'
+        };
+      }
+    }
+
+    clearTimeout(timeoutId);
+
+    const { data, error } = await Promise.race([
+      supabase.auth.signInWithPassword({
+        email, password
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('timeout')),
+          12000
+        )
+      )
+    ]);
 
     if (error) {
+      const msg = error?.message || '';
       return {
         success: false,
-        error: error.message
+        error: msg || 'Login failed.'
       };
     }
 
-    if (!data.user) {
+    if (!data) {
       return {
         success: false,
         error: 'Login failed.'
@@ -179,6 +230,17 @@ export async function loginWithSupabase(
     };
   } catch (err) {
     console.error('Login error:', err);
+    const message =
+      err instanceof Error ? err.message : '';
+    if (
+      message === 'timeout' ||
+      message.includes('timeout')
+    ) {
+      return {
+        success: false,
+        error: 'Connection timed out. Please check your internet and try again.'
+      };
+    }
     return {
       success: false,
       error: 'Login failed. Please try again.'

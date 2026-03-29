@@ -27,7 +27,7 @@ export const LoginScreen = () => {
       setError(
         'Login is taking too long. Please try again.'
       );
-    }, 30000);
+    }, 20000);
 
     const result = await loginWithSupabase(
       email, password
