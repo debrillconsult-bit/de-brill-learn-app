@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ADMIN_ROLE_STORAGE_KEY, getStoredUserRole } from '@/src/features/admin/services/adminApi';
+import { supabase } from '../../../lib/supabase';
 
 const navigation = [
   { label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard },
@@ -35,13 +36,6 @@ export const AdminLayout = () => {
   // if (userRole !== 'admin') {
   //   return <Navigate to="/home-student" replace />;
   // }
-
-  const logout = () => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.removeItem(ADMIN_ROLE_STORAGE_KEY);
-    }
-    navigate('/home-student', { replace: true });
-  };
 
   return (
     <div className="min-h-screen bg-[#EEF3F8] text-brand-navy">
@@ -95,7 +89,15 @@ export const AdminLayout = () => {
                 </div>
               </div>
               <button
-                onClick={logout}
+                onClick={() => {
+                  localStorage.removeItem('debrilllearn_session');
+                  if (typeof window !== 'undefined') {
+                    window.localStorage.removeItem(ADMIN_ROLE_STORAGE_KEY);
+                  }
+                  supabase.auth.signOut().then(() => {
+                    navigate('/login');
+                  });
+                }}
                 className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#10244E] px-4 py-3 text-[13px] font-bold"
               >
                 <LogOut size={16} />
