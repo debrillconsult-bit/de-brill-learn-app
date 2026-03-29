@@ -22,11 +22,19 @@ export const LoginScreen = () => {
     }
     setIsLoading(true);
     setError('');
+    const loginTimeout = setTimeout(() => {
+      setIsLoading(false);
+      setError(
+        'Login is taking too long. Please try again.'
+      );
+    }, 10000);
+
     const result = await loginWithSupabase(
       email, password
     );
 
     if (!result.success) {
+      clearTimeout(loginTimeout);
       setError(result.error || 'Login failed.');
       setIsLoading(false);
       return;
@@ -34,21 +42,24 @@ export const LoginScreen = () => {
 
     if (result.user) {
       setUser(result.user as any);
-      switch (result.user.role) {
-        case 'child':
-          navigate('/home-child');
-          break;
-        case 'teacher':
-          navigate('/teacher/dashboard');
-          break;
-        case 'parent':
-          navigate('/parent/dashboard');
-          break;
-        default:
-          navigate('/home-student');
-      }
     }
+    clearTimeout(loginTimeout);
+    const role = result.user?.role || 'student';
     setIsLoading(false);
+
+    switch (role) {
+      case 'child':
+        navigate('/home-child');
+        break;
+      case 'teacher':
+        navigate('/teacher/dashboard');
+        break;
+      case 'parent':
+        navigate('/parent/dashboard');
+        break;
+      default:
+        navigate('/home-student');
+    }
   };
 
   return (

@@ -115,20 +115,67 @@ export async function loginWithSupabase(
       };
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', data.user.id)
-      .single();
+    await new Promise(resolve =>
+      setTimeout(resolve, 500)
+    );
+
+    let profile = null;
+    try {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+      profile = profileData;
+    } catch (profileErr) {
+      console.warn('Profile fetch failed:', profileErr);
+    }
+
+    if (!profile) {
+      const role = data.user.user_metadata?.role || 'student';
+      const fullName =
+        data.user.user_metadata?.full_name ||
+        data.user.email?.split('@')[0] ||
+        'User';
+
+      try {
+        const { data: newProfile } = await supabase
+          .from('profiles')
+          .upsert({
+            id: data.user.id,
+            email: data.user.email || email,
+            full_name: fullName,
+            role: role,
+            language: 'british',
+          })
+          .select()
+          .single();
+        profile = newProfile;
+      } catch (createErr) {
+        console.warn('Profile create failed:', createErr);
+      }
+    }
 
     return {
       success: true,
-      user: profile || undefined
+      user: profile || {
+        id: data.user.id,
+        email: data.user.email || email,
+        full_name:
+          data.user.user_metadata?.full_name ||
+          'User',
+        role: data.user.user_metadata?.role ||
+          'student',
+        language: 'british',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as Profile
     };
-  } catch {
+  } catch (err) {
+    console.error('Login error:', err);
     return {
       success: false,
-      error: 'Login failed. Try again.'
+      error: 'Login failed. Please try again.'
     };
   }
 }
