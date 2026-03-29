@@ -98,6 +98,12 @@ export async function loginWithSupabase(
   password: string
 ): Promise<AuthResult> {
   try {
+    console.log(
+      'Attempting login with Supabase URL:',
+      import.meta.env.VITE_SUPABASE_URL ||
+      'URL NOT FOUND'
+    );
+
     const { data, error } = await supabase.auth
       .signInWithPassword({ email, password });
 
