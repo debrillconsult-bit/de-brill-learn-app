@@ -138,6 +138,8 @@ export const SoundChart = () => {
   const navigate = useNavigate();
   const [activeCell, setActiveCell] = React.useState<SoundCell | null>(null);
   const [activeTab, setActiveTab] = React.useState<'vowels' | 'consonants'>('vowels');
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const [playingSound, setPlayingSound] = React.useState<string | null>(null);
   const activeDiagram = activeCell ? speechOrganBySymbol[activeCell.symbol] : null;
 
   React.useEffect(() => () => {
@@ -146,7 +148,10 @@ export const SoundChart = () => {
     }
   }, []);
 
-  const tryApiTTS = async (text: string) => {
+  const tryApiFallback = async (
+    text: string,
+    cleanup: () => void
+  ) => {
     try {
       const res = await fetch('/api/tts', {
         method: 'POST',
@@ -155,76 +160,94 @@ export const SoundChart = () => {
         },
         body: JSON.stringify({ text }),
       });
-      if (!res.ok) return;
-      const data = await res.json() as { text?: string };
-      if (!('speechSynthesis' in window)) return;
-      const synth = window.speechSynthesis;
-      const utterance = new SpeechSynthesisUtterance(data.text || text);
-      utterance.lang = 'en-GB';
-      utterance.rate = 0.85;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-      synth.cancel();
-      synth.speak(utterance);
-    } catch {
-      console.warn('TTS fallback failed for:', text);
+
+      if (res.ok) {
+        const blob = await res.blob();
+        if (blob.size > 0) {
+          const url = URL.createObjectURL(blob);
+          const audio = new Audio(url);
+          audio.onended = () => {
+            URL.revokeObjectURL(url);
+            cleanup();
+          };
+          audio.onerror = cleanup;
+          await audio.play();
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('TTS API fallback failed:', err);
     }
+    cleanup();
   };
 
   const speak = async (text: string) => {
-    const synth = window.speechSynthesis;
+    if (isPlaying) return;
+    setIsPlaying(true);
+    setPlayingSound(text);
 
-    if (synth) {
+    const cleanup = () => {
+      setIsPlaying(false);
+      setPlayingSound(null);
+    };
+
+    if (typeof window !== 'undefined' &&
+        window.speechSynthesis) {
+
+      const synth = window.speechSynthesis;
       synth.cancel();
 
-      const trySpeak = () => {
-        const utterance = new SpeechSynthesisUtterance(text);
+      const doSpeak = () => {
+        const utterance =
+          new SpeechSynthesisUtterance(text);
         utterance.lang = 'en-GB';
         utterance.rate = 0.85;
-        utterance.pitch = 1;
-        utterance.volume = 1;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
 
         const voices = synth.getVoices();
-        const britishVoice = voices.find(v =>
+        const preferred = voices.find(v =>
           v.lang === 'en-GB' ||
           v.lang.startsWith('en-GB') ||
-          v.name.toLowerCase().includes('british') ||
           v.name.includes('Daniel') ||
           v.name.includes('Kate') ||
-          v.name.includes('Serena')
+          v.name.includes('Google UK')
         );
-        if (britishVoice) {
-          utterance.voice = britishVoice;
+        if (preferred) {
+          utterance.voice = preferred;
         }
 
+        utterance.onend = cleanup;
         utterance.onerror = () => {
-          void tryApiTTS(text);
+          void tryApiFallback(text, cleanup);
         };
 
         synth.speak(utterance);
 
-        window.setTimeout(() => {
-          if (!synth.speaking && !synth.pending) {
-            void tryApiTTS(text);
-          }
-        }, 1000);
-      };
-
-      if (synth.getVoices().length === 0) {
-        synth.onvoiceschanged = () => {
-          synth.onvoiceschanged = null;
-          trySpeak();
-        };
-        window.setTimeout(() => {
-          if (synth.getVoices().length === 0) {
-            void tryApiTTS(text);
+        setTimeout(() => {
+          if (!synth.speaking) {
+            synth.cancel();
+            void tryApiFallback(text, cleanup);
           }
         }, 2000);
+      };
+
+      const voices = synth.getVoices();
+      if (voices.length > 0) {
+        doSpeak();
       } else {
-        trySpeak();
+        synth.onvoiceschanged = () => {
+          synth.onvoiceschanged = null;
+          doSpeak();
+        };
+        setTimeout(() => {
+          if (!synth.speaking) {
+            void tryApiFallback(text, cleanup);
+          }
+        }, 3000);
       }
     } else {
-      await tryApiTTS(text);
+      void tryApiFallback(text, cleanup);
     }
   };
 

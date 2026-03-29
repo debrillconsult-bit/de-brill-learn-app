@@ -25,16 +25,28 @@ export const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
 
   React.useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
 
-  // TODO: restore auth check when auth system is implemented
-  // if (userRole !== 'admin') {
-  //   return <Navigate to="/home-student" replace />;
-  // }
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#1B3A7A] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <img
+            src="/dbc-logo.png"
+            alt="De-Brill"
+            className="w-16 h-16 object-contain animate-pulse"
+          />
+          <p className="text-white text-[14px]">
+            Loading admin panel...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#EEF3F8] text-brand-navy">

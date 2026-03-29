@@ -58,6 +58,17 @@ export async function registerWithSupabase(
       });
 
     if (authError) {
+      if (
+        authError.message.includes('already registered') ||
+        authError.message.includes('already exists') ||
+        authError.message.includes('duplicate')
+      ) {
+        return {
+          success: false,
+          error: 'An account with this email already ' +
+            'exists. Please log in instead.'
+        };
+      }
       return {
         success: false,
         error: authError.message
@@ -75,17 +86,20 @@ export async function registerWithSupabase(
       .from('profiles')
       .upsert({
         id: authData.user.id,
-        email: data.email,
+        email: data.email.toLowerCase().trim(),
         full_name: data.fullName,
         role: data.role,
         class_level: data.classLevel || null,
         school_name: data.schoolName || null,
         language: 'british',
+      }, {
+        onConflict: 'id'
       });
 
     if (profileError) {
-      console.error(
-        'Profile creation error:', profileError
+      console.warn(
+        'Profile upsert after registration:',
+        profileError.message
       );
     }
 
@@ -178,24 +192,40 @@ export async function loginWithSupabase(
       };
     }
 
-    await new Promise(resolve =>
-      setTimeout(resolve, 500)
-    );
-
     let profile = null;
-    try {
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', data.user.id)
-        .single();
-      profile = profileData;
-    } catch (profileErr) {
-      console.warn('Profile fetch failed:', profileErr);
+    let fetchAttempts = 0;
+
+    while (!profile && fetchAttempts < 3) {
+      fetchAttempts++;
+      try {
+        await new Promise(resolve =>
+          setTimeout(resolve, fetchAttempts * 300)
+        );
+        const { data: profileData, error: profileError } =
+          await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+
+        if (!profileError && profileData) {
+          profile = profileData;
+        } else {
+          console.warn(
+            `Profile fetch attempt ${fetchAttempts} failed:`,
+            profileError?.message
+          );
+        }
+      } catch (e) {
+        console.warn(
+          `Profile fetch attempt ${fetchAttempts} threw:`, e
+        );
+      }
     }
 
     if (!profile) {
-      const role = data.user.user_metadata?.role || 'student';
+      const role =
+        data.user.user_metadata?.role || 'student';
       const fullName =
         data.user.user_metadata?.full_name ||
         data.user.email?.split('@')[0] ||
@@ -215,7 +245,7 @@ export async function loginWithSupabase(
           .single();
         profile = newProfile;
       } catch (createErr) {
-        console.warn('Profile create failed:', createErr);
+        console.warn('Profile upsert failed:', createErr);
       }
     }
 
@@ -225,10 +255,8 @@ export async function loginWithSupabase(
         id: data.user.id,
         email: data.user.email || email,
         full_name:
-          data.user.user_metadata?.full_name ||
-          'User',
-        role: data.user.user_metadata?.role ||
-          'student',
+          data.user.user_metadata?.full_name || 'User',
+        role: data.user.user_metadata?.role || 'student',
         language: 'british',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
