@@ -33,6 +33,7 @@ import { StudentProfile } from './screens/FlowF/StudentProfile';
 import { SettingsScreen } from './screens/FlowF/Settings';
 import { NotificationsScreen } from './screens/FlowF/Notifications';
 import { PrivacySecurityScreen } from './screens/FlowF/PrivacySecurity';
+import { PrivacyPolicyScreen } from './screens/FlowF/PrivacyPolicy';
 import { HelpCenterScreen } from './screens/FlowF/HelpCenter';
 import { AboutScreen } from './screens/FlowF/About';
 import { TeacherDashboard } from './screens/FlowG/TeacherDashboard';
@@ -202,6 +203,7 @@ const AppShell = () => {
           <Route path="/settings" element={<SettingsScreen />} />
           <Route path="/notifications" element={<NotificationsScreen />} />
           <Route path="/privacy" element={<PrivacySecurityScreen />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
           <Route path="/help" element={<HelpCenterScreen />} />
           <Route path="/about" element={<AboutScreen />} />
 
