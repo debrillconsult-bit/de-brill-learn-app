@@ -19,16 +19,22 @@ export interface AuthResult {
 export async function testSupabaseConnection():
   Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('profiles')
-      .select('count')
-      .limit(1);
-
-    if (error && error.code !== 'PGRST116') {
-      console.error('Supabase connection test failed:', error);
-      return false;
-    }
-    return true;
+    const res = await fetch(
+      'https://tmatdskpcunreyhheupp.supabase.co' +
+      '/rest/v1/',
+      {
+        headers: {
+          apikey:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9' +
+            '.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRt' +
+            'YXRkc2twY3VucmV5aGhldXBwIiwicm9sZSI6Im' +
+            'Fub24iLCJpYXQiOjE3NzQ3MDY4NDIsImV4cCI6' +
+            'MjA5MDI4Mjg0Mn0.BB-5BaL0JBvf1wusylv6W0' +
+            'yb-u7roimO5vNp1g4cp6Q'
+        }
+      }
+    );
+    return res.ok;
   } catch (err) {
     console.error('Supabase unreachable:', err);
     return false;
