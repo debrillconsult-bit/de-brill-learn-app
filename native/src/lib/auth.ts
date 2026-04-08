@@ -16,7 +16,7 @@ export async function registerUser(data: {
   schoolName?: string;
 }): Promise<AuthResult> {
   try {
-    const { data: authData, error } = await supabase.auth.signUp({
+    const signUpPromise = supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
@@ -27,9 +27,33 @@ export async function registerUser(data: {
       },
     });
 
+    const timeoutPromise = new Promise<never>(
+      (_, reject) => setTimeout(
+        () => reject(new Error('timeout')),
+        15000
+      )
+    );
+
+    const { data: authData, error } =
+      await Promise.race([
+        signUpPromise,
+        timeoutPromise,
+      ]) as any;
+
     if (error) {
+      if (error.message === 'timeout') {
+        return {
+          success: false,
+          error: 'Connection timed out. Please ' +
+            'check your internet and try again.',
+        };
+      }
       if (error.message.includes('already')) {
-        return { success: false, error: 'An account with this email already exists.' };
+        return {
+          success: false,
+          error: 'An account with this email ' +
+            'already exists. Please log in.',
+        };
       }
       return { success: false, error: error.message };
     }
@@ -50,16 +74,43 @@ export async function registerUser(data: {
     }
 
     return { success: true };
-  } catch {
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : '';
+    if (msg === 'timeout' || msg.includes('timeout')) {
+      return {
+        success: false,
+        error: 'Connection timed out. Please check your internet and try again.',
+      };
+    }
     return { success: false, error: 'Registration failed. Try again.' };
   }
 }
 
 export async function loginUser(email: string, password: string): Promise<AuthResult> {
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const signInPromise = supabase.auth.signInWithPassword({ email, password });
+
+    const loginTimeoutPromise = new Promise<never>(
+      (_, reject) => setTimeout(
+        () => reject(new Error('timeout')),
+        15000
+      )
+    );
+
+    const { data, error } =
+      await Promise.race([
+        signInPromise,
+        loginTimeoutPromise,
+      ]) as any;
 
     if (error) {
+      if (error.message === 'timeout') {
+        return {
+          success: false,
+          error: 'Connection timed out. Please ' +
+            'check your internet and try again.',
+        };
+      }
       return { success: false, error: error.message };
     }
 
@@ -90,7 +141,14 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
     }
 
     return { success: true, user: profile };
-  } catch {
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : '';
+    if (msg === 'timeout' || msg.includes('timeout')) {
+      return {
+        success: false,
+        error: 'Connection timed out. Please check your internet and try again.',
+      };
+    }
     return { success: false, error: 'Login failed. Try again.' };
   }
 }
