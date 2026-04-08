@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "De-Brill Learn",
+    "slug": "de-brill-learn",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1B3A7A"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.debrillconsults.learn",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "De-Brill Learn uses your microphone for pronunciation practice.",
+        "NSSpeechRecognitionUsageDescription": "De-Brill Learn uses speech recognition to give you pronunciation feedback."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1B3A7A"
+      },
+      "package": "com.debrillconsults.learn",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "De-Brill Learn uses camera for profile photos."
+        }
+      ],
+      "expo-secure-store",
+      "expo-asset",
+      "expo-font"
+    ],
+    "extra": {
+      "supabaseUrl": "https://tmatdskpcunreyhheupp.supabase.co",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtYXRkc2twY3VucmV5aGhldXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDY4NDIsImV4cCI6MjA5MDI4Mjg0Mn0.BB-5BaL0JBvf1wusylv6W0yb-u7roimO5vNp1g4cp6Q",
+      "apiBaseUrl": "https://de-brill-learn-app.vercel.app"
+    }
+  }
+}
