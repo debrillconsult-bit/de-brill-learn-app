@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.lg,
     paddingBottom: Spacing.base,
   },
-  logo: { width: 36, height: 36, marginRight: 8 },
+  logo: { width: 60, height: 60, borderRadius: 12, marginRight: 8, resizeMode: 'contain' },
   logoText: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.extrabold,

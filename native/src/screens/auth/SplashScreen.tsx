@@ -33,7 +33,7 @@ export const SplashScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   content: { alignItems: 'center', flex: 1, justifyContent: 'center' },
-  logo: { width: 120, height: 120, marginBottom: 24 },
+  logo: { width: 60, height: 60, borderRadius: 12, marginBottom: 24, resizeMode: 'contain' },
   title: {
     color: Colors.white,
     fontSize: Typography.sizes['3xl'],
