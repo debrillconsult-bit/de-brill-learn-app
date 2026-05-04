@@ -60,8 +60,23 @@ export default async function handler(
       );
     }
 
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+
+    if (!apiKey || apiKey === 'your_anthropic_api_key_here') {
+      console.warn('Anthropic API key missing. Returning mock response.');
+      const lastMessage = messages[messages.length - 1]?.content || '';
+      return new Response(
+        JSON.stringify({
+          content: `[MOCK MODE] Hi! I'm Coach Brill. I'm currently in 'development mode' because my AI brain isn't connected yet. You asked: "${lastMessage}". I'm excited to help you learn phonics soon!`
+        }),
+        { status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     const anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
+      apiKey: apiKey,
     });
 
     const ageContext = userAge && userAge < 8

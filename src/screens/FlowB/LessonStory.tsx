@@ -62,7 +62,7 @@ export const LessonStory = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-brand-offwhite">
+    <div className="h-full flex flex-col bg-brand-offwhite">
       <StatusBar />
       
       {/* Lesson Header */}

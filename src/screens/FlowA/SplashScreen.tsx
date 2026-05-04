@@ -2,19 +2,47 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StatusBar } from '@/src/components/Layout';
 
+import { supabase } from '@/src/lib/supabase';
+
 export const SplashScreen = () => {
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      navigate('/welcome');
+    const timer = setTimeout(async () => {
+      try {
+        // Race the session check against a 2-second timeout
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('timeout')), 2000)
+        );
+
+        const result: any = await Promise.race([sessionPromise, timeoutPromise]).catch(() => ({ data: { session: null } }));
+        const session = result?.data?.session;
+        const savedPin = localStorage.getItem('debrill_user_pin');
+
+        if (session) {
+          if (savedPin) {
+            navigate('/pin-lock');
+          } else {
+            const role = session.user.user_metadata?.role || 'student';
+            if (role === 'teacher') navigate('/teacher/dashboard');
+            else if (role === 'parent') navigate('/parent/dashboard');
+            else navigate('/home-student');
+          }
+        } else {
+          navigate('/welcome');
+        }
+      } catch (err) {
+        console.warn('Splash session check failed or timed out:', err);
+        navigate('/welcome');
+      }
     }, 2500);
     return () => clearTimeout(timer);
   }, [navigate]);
 
   return (
     <div 
-      className="min-h-screen w-full bg-brand-navy flex flex-col cursor-pointer"
+      className="h-full w-full bg-brand-navy flex flex-col cursor-pointer"
       onClick={() => navigate('/welcome')}
     >
       <StatusBar />
@@ -33,10 +61,6 @@ export const SplashScreen = () => {
           <p className="text-white/70 text-[13px] text-center px-12 leading-relaxed">
             Speak clearly. Read confidently. Learn joyfully.
           </p>
-          {/* Newly Revised 2026 badge — bottom-right of gold diagonal section */}
-          <div className="absolute bottom-4 right-6 bg-white/20 text-white text-[10px] px-2 py-0.5 rounded-full">
-            Newly Revised 2026
-          </div>
         </div>
 
         <div className="absolute inset-0 bg-brand-navy diagonal-header-navy z-0">
@@ -53,24 +77,11 @@ export const SplashScreen = () => {
         <div className="absolute top-0 right-0 w-20 h-20 bg-[#4DBBEE] corner-accent z-20" />
       </div>
 
-      {/* Bottom Surface */}
-      <div className="h-[30%] bg-white px-8 pb-8 flex flex-col items-center justify-center gap-4">
-        <button 
-          className="w-full h-12 bg-[#F47920] rounded-[20px] text-brand-navy font-bold text-[14px]"
-          onClick={(e) => { e.stopPropagation(); navigate('/welcome'); }}
-        >
-          Get started
-        </button>
-        <button
-          className="w-full h-12 border-2 border-brand-navy rounded-[20px] text-brand-navy font-bold text-[14px]"
-          onClick={(e) => { e.stopPropagation(); navigate('/login'); }}
-        >
-          Log in
-        </button>
-        
-        <div className="absolute bottom-6 right-6 flex items-center gap-1">
-          <span className="text-[11px] text-brand-muted">🇬🇧 British English</span>
-        </div>
+      {/* Loading indicator */}
+      <div className="h-[12%] bg-brand-navy flex items-center justify-center gap-2 pb-6">
+        <div className="w-2 h-2 rounded-full bg-brand-gold/40 animate-bounce" style={{ animationDelay: '0ms' }} />
+        <div className="w-2 h-2 rounded-full bg-brand-gold/40 animate-bounce" style={{ animationDelay: '150ms' }} />
+        <div className="w-2 h-2 rounded-full bg-brand-gold/40 animate-bounce" style={{ animationDelay: '300ms' }} />
       </div>
     </div>
   );

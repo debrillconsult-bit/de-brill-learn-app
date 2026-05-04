@@ -3,9 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { StatusBar, DiagonalHeader } from '@/src/components/Layout';
 import { Play, Star, Trophy, Sparkles } from 'lucide-react';
 import { BookCover } from '@/src/components/BookCover';
+import { useAuth } from '@/src/lib/AuthContext';
 
 export const HomeStudent = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const displayName = user?.nickname || user?.full_name || 'Student';
 
   return (
     <div className="flex-1 flex flex-col bg-brand-offwhite overflow-y-auto pb-4">
@@ -19,7 +22,7 @@ export const HomeStudent = () => {
           />
           <div className="flex flex-col gap-0.5">
             <span className="text-[12px] text-brand-navy/60">Good morning,</span>
-            <span className="text-[16px] font-bold text-brand-navy">Chidi Obi</span>
+            <span className="text-[16px] font-bold text-brand-navy">{displayName}</span>
           </div>
         </div>
         <div className="ml-auto mr-16 flex items-center gap-2 bg-brand-gold/20 border border-brand-gold/50 rounded-full px-3 py-1">

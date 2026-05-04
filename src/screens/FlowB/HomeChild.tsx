@@ -2,9 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StatusBar, DiagonalHeader } from '@/src/components/Layout';
 import { Sparkles, Play } from 'lucide-react';
+import { useAuth } from '@/src/lib/AuthContext';
 
 export const HomeChild = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const displayName = user?.nickname || user?.full_name?.split(' ')[0] || 'Learner';
 
   return (
     <div className="flex-1 flex flex-col bg-brand-offwhite overflow-y-auto pb-4">
@@ -12,7 +15,7 @@ export const HomeChild = () => {
       <DiagonalHeader accentColor="#7B1FA2">
         <div className="flex flex-col gap-0.5 ml-4">
           <span className="text-[14px] text-brand-navy/60">Hello,</span>
-          <span className="text-[20px] font-bold text-brand-navy">Little Chidi!</span>
+          <span className="text-[20px] font-bold text-brand-navy">Little {displayName}!</span>
         </div>
       </DiagonalHeader>
 

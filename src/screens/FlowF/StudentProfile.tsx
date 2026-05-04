@@ -6,7 +6,10 @@ import { useAuth } from '@/src/lib/AuthContext';
 
 export const StudentProfile = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+
+  const displayName = user?.nickname || user?.full_name || 'Student';
+  const displayClass = user?.class_level || 'No Class Assigned';
 
   return (
     <div className="flex-1 flex flex-col bg-brand-offwhite overflow-y-auto pb-20">
@@ -16,12 +19,12 @@ export const StudentProfile = () => {
       <div className="p-4 flex flex-col gap-6">
         {/* Profile Info Card */}
         <div className="bg-white rounded-[24px] p-6 border border-[#DDDDDD] flex flex-col items-center text-center gap-4 shadow-sm">
-          <div className="w-24 h-24 rounded-full bg-brand-gold/20 border-4 border-brand-gold flex items-center justify-center text-[48px] overflow-hidden">
-            🦁
+          <div className="w-24 h-24 rounded-full bg-brand-gold/20 border-4 border-brand-gold flex items-center justify-center text-[48px] overflow-hidden uppercase">
+            {displayName[0] || '🦁'}
           </div>
           <div className="flex flex-col gap-1">
-            <h2 className="text-[20px] font-bold text-brand-navy">Chidi Okoro</h2>
-            <p className="text-[13px] text-brand-muted font-medium">Primary 3 • MEP Series</p>
+            <h2 className="text-[20px] font-bold text-brand-navy">{displayName}</h2>
+            <p className="text-[13px] text-brand-muted font-medium">{displayClass} • Student</p>
           </div>
           <button className="bg-brand-navy text-white px-6 py-2 rounded-full text-[13px] font-bold active:scale-95 transition-transform">
             Edit Profile
@@ -88,7 +91,6 @@ export const StudentProfile = () => {
         <button
           onClick={async () => {
             await logout();
-            navigate('/');
           }}
           className="bg-red-50 text-red-600 rounded-[20px] p-4 flex items-center justify-center gap-3 font-bold active:bg-red-100 transition-colors"
         >

@@ -38,8 +38,22 @@ export default async function handler(
       );
     }
 
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+
+    if (!apiKey || apiKey === 'your_anthropic_api_key_here') {
+      console.warn('Anthropic API key missing. Returning mock response.');
+      return new Response(
+        JSON.stringify({
+          feedback: `[MOCK MODE] Fantastic effort reading "${targetText}"! You're doing a great job with your phonics. Keep practising and you'll be a pro in no time!`
+        }),
+        { status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     const anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
+      apiKey: apiKey,
     });
 
     const prompt = `A student is practising this sentence:

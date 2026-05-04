@@ -261,7 +261,7 @@ export const SoundChart = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-brand-offwhite overflow-y-auto min-h-screen pb-8">
+    <div className="flex-1 flex flex-col bg-brand-offwhite overflow-y-auto h-full pb-8">
       <StatusBar />
       <DiagonalHeader
         title="English Sound Chart"

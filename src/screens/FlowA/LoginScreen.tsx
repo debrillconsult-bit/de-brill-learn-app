@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DiagonalHeader } from '@/src/components/Layout';
+import { DiagonalHeader, StatusBar } from '@/src/components/Layout';
 import { Button } from '@/src/components/Button';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { loginWithSupabase } from '@/src/lib/supabaseAuth';
 import { useAuth } from '@/src/lib/AuthContext';
 
@@ -20,54 +20,70 @@ export const LoginScreen = () => {
       setError('Please enter your email and password.');
       return;
     }
+    if (isLoading) return;
+
     setIsLoading(true);
     setError('');
-    const loginTimeout = setTimeout(() => {
+
+    try {
+      const result = await loginWithSupabase(email.trim(), password);
+
+      if (!result.success) {
+        const msg = result.error || '';
+        if (msg.toLowerCase().includes('invalid login') || msg.toLowerCase().includes('credentials')) {
+          setError('Incorrect email or password. Please try again.');
+        } else if (msg.toLowerCase().includes('not confirmed') || msg.toLowerCase().includes('email')) {
+          setError('Your email is not confirmed. Please check your inbox.');
+        } else {
+          setError(msg || 'Login failed. Please try again.');
+        }
+        return;
+      }
+
+      if (result.user) {
+        setUser(result.user as any);
+      }
+
+      const role = result.user?.role || 'student';
+      switch (role) {
+        case 'child':
+        case 'student':
+          navigate('/home-student');
+          break;
+        case 'teacher':
+          navigate('/teacher/dashboard');
+          break;
+        case 'parent':
+          navigate('/parent/dashboard');
+          break;
+        case 'admin':
+          navigate('/admin/dashboard');
+          break;
+        default:
+          navigate('/home-student');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
       setIsLoading(false);
-      setError(
-        'Login is taking too long. Please try again.'
-      );
-    }, 20000);
-
-    const result = await loginWithSupabase(
-      email, password
-    );
-
-    if (!result.success) {
-      clearTimeout(loginTimeout);
-      setError(result.error || 'Login failed.');
-      setIsLoading(false);
-      return;
-    }
-
-    if (result.user) {
-      setUser(result.user as any);
-    }
-    clearTimeout(loginTimeout);
-    const role = result.user?.role || 'student';
-    setIsLoading(false);
-
-    switch (role) {
-      case 'child':
-        navigate('/home-child');
-        break;
-      case 'teacher':
-        navigate('/teacher/dashboard');
-        break;
-      case 'parent':
-        navigate('/parent/dashboard');
-        break;
-      case 'admin':
-        navigate('/admin/dashboard');
-        break;
-      default:
-        navigate('/home-student');
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F5F7FA]">
+    <div className="h-full flex flex-col bg-[#F5F7FA]">
+      <StatusBar />
       <DiagonalHeader title="Welcome back" />
+
+      {/* Full-screen loader overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-brand-navy/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center gap-4">
+          <div className="bg-white rounded-[24px] px-10 py-8 flex flex-col items-center gap-4 shadow-2xl">
+            <Loader2 size={40} className="text-brand-gold animate-spin" />
+            <p className="text-[15px] font-bold text-brand-navy">Signing you in…</p>
+            <p className="text-[12px] text-brand-muted text-center">Just a moment, please.</p>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 p-6 flex flex-col gap-6">
         <div className="flex flex-col items-center gap-3 pt-4 pb-2">
@@ -79,15 +95,14 @@ export const LoginScreen = () => {
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-[12px] font-bold text-brand-navy ml-1">
-              EMAIL ADDRESS
-            </label>
+            <label className="text-[12px] font-bold text-brand-navy ml-1">EMAIL ADDRESS</label>
             <input
               type="email"
               placeholder="Enter your email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="h-12 bg-white border border-[#CCCCCC] rounded-[8px] px-4 text-[14px] focus:outline-none focus:border-brand-gold"
+              disabled={isLoading}
+              className="h-12 bg-white border border-[#CCCCCC] rounded-[8px] px-4 text-[14px] focus:outline-none focus:border-brand-gold disabled:opacity-50"
             />
           </div>
 
@@ -100,13 +115,24 @@ export const LoginScreen = () => {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleLogin()}
-                className="w-full h-12 bg-white border border-[#CCCCCC] rounded-[8px] px-4 pr-12 text-[14px] focus:outline-none focus:border-brand-gold"
+                disabled={isLoading}
+                className="w-full h-12 bg-white border border-[#CCCCCC] rounded-[8px] px-4 pr-12 text-[14px] focus:outline-none focus:border-brand-gold disabled:opacity-50"
               />
               <button
+                type="button"
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-muted"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+            <div className="flex justify-end mt-1 mr-1">
+              <button
+                type="button"
+                onClick={() => navigate('/forgot-password')}
+                className="text-[12px] text-brand-muted hover:text-brand-gold hover:underline font-medium"
+              >
+                Forgot Password?
               </button>
             </div>
           </div>
@@ -120,12 +146,13 @@ export const LoginScreen = () => {
       </div>
 
       <div className="p-6 pb-12 flex flex-col gap-4 bg-white border-t border-[#DDDDDD]">
-        <Button fullWidth onClick={handleLogin}>
-          {isLoading ? 'Signing in...' : 'Log In'}
+        <Button fullWidth onClick={handleLogin} disabled={isLoading}>
+          {isLoading ? 'Signing in…' : 'Log In'}
         </Button>
         <button
           className="text-[13px] text-brand-muted text-center"
           onClick={() => navigate('/account-creation')}
+          disabled={isLoading}
         >
           Don't have an account?{' '}
           <span className="text-brand-navy font-bold">Create one</span>
@@ -133,6 +160,7 @@ export const LoginScreen = () => {
         <button
           className="text-[12px] text-brand-muted text-center"
           onClick={() => navigate('/')}
+          disabled={isLoading}
         >
           Back to start
         </button>

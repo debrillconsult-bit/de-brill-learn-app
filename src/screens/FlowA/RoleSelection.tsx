@@ -43,7 +43,7 @@ export const RoleSelection = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col bg-brand-offwhite overflow-y-auto">
+    <div className="h-full flex flex-col bg-brand-offwhite overflow-y-auto">
       <StatusBar />
       <DiagonalHeader title="Who is using the app?" />
       

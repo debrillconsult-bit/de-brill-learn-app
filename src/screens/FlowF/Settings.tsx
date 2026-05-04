@@ -69,6 +69,41 @@ export const SettingsScreen = () => {
           </div>
         </div>
 
+        {/* Security Section */}
+        <div className="flex flex-col gap-4">
+          <h3 className="text-[12px] font-bold text-brand-gold uppercase tracking-wider px-1">SECURITY</h3>
+          <div className="bg-white rounded-[20px] border border-[#DDDDDD] overflow-hidden">
+            <div className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-[12px] bg-brand-navy/5 flex items-center justify-center">
+                  <Shield size={20} className="text-brand-navy" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[15px] font-bold text-brand-navy">PIN Lock</span>
+                  <span className="text-[11px] text-brand-muted">Unlock app with security PIN</span>
+                </div>
+              </div>
+              <Toggle 
+                active={!!localStorage.getItem('debrill_user_pin')} 
+                onToggle={() => {
+                  if (localStorage.getItem('debrill_user_pin')) {
+                    localStorage.removeItem('debrill_user_pin');
+                    alert('Security PIN cleared.');
+                  } else {
+                    const userPin = prompt('Set a new 6-digit security PIN:');
+                    if (userPin && userPin.length === 6 && /^\d+$/.test(userPin)) {
+                      localStorage.setItem('debrill_user_pin', userPin);
+                      alert('Security PIN saved successfully.');
+                    } else {
+                      alert('Invalid PIN. Must be exactly 6 numerical digits.');
+                    }
+                  }
+                }} 
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Learning Section */}
         <div className="flex flex-col gap-4">
           <h3 className="text-[12px] font-bold text-brand-gold uppercase tracking-wider px-1">LEARNING</h3>

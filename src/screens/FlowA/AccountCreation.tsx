@@ -2,9 +2,9 @@ import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { StatusBar, DiagonalHeader } from '@/src/components/Layout';
 import { Button } from '@/src/components/Button';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { registerWithSupabase } from '@/src/lib/supabaseAuth';
-import { useAuth } from '@/src/lib/AuthContext';
+import { supabase } from '@/src/lib/supabase';
 
 export const AccountCreation = () => {
   const [searchParams] = useSearchParams();
@@ -12,9 +12,10 @@ export const AccountCreation = () => {
   const validRoles = ['student', 'child', 'teacher', 'parent'];
   const role = validRoles.includes(rawRole) ? rawRole : 'student';
   const navigate = useNavigate();
-  const { setUser } = useAuth();
 
   const [showPassword, setShowPassword] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [slowMessage, setSlowMessage] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
   const [emailError, setEmailError] = React.useState('');
   const [formData, setFormData] = React.useState({
@@ -32,9 +33,7 @@ export const AccountCreation = () => {
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
-    if (name === 'email') {
-      setEmailError('');
-    }
+    if (name === 'email') setEmailError('');
   };
 
   const isFormValid = () => {
@@ -46,10 +45,76 @@ export const AccountCreation = () => {
     return true;
   };
 
+  const handleSubmit = async () => {
+    setSubmitted(true);
+    if (!isFormValid()) return;
+    if (isLoading) return;
+
+    setIsLoading(true);
+    setSlowMessage(false);
+    setEmailError('');
+
+    // After 10 seconds show a reassurance message — but DO NOT cancel the request.
+    // Cancelling caused Supabase to create accounts while showing an error to the user.
+    const slowTimer = setTimeout(() => setSlowMessage(true), 10000);
+
+    try {
+      const result = await registerWithSupabase({
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        role: role as 'student' | 'child' | 'teacher' | 'parent',
+        classLevel: formData.classLevel,
+        schoolName: formData.schoolName,
+      });
+      clearTimeout(slowTimer);
+
+      if (!result.success) {
+        const errorMessage = result.error || '';
+        if (errorMessage.includes('fetch') || errorMessage.includes('network') || errorMessage.includes('Failed')) {
+          setEmailError('Connection error. Please check your internet and try again.');
+        } else if (errorMessage.toLowerCase().includes('already')) {
+          setEmailError('An account with this email already exists. Please log in instead.');
+        } else {
+          setEmailError(errorMessage || 'Registration failed. Try again.');
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      // Success — save state and navigate immediately.
+      localStorage.setItem('pendingRole', role);
+      localStorage.setItem('debrilllearn_pending_role', role);
+      localStorage.setItem('pendingEmail', formData.email);
+      window.location.href = '/email-verification';
+
+    } catch (err) {
+      clearTimeout(slowTimer);
+      setEmailError('Something went wrong. Please check your connection and try again.');
+      setIsLoading(false);
+      setSlowMessage(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-brand-offwhite overflow-y-auto">
+    <div className="h-full flex flex-col bg-brand-offwhite overflow-y-auto">
       <StatusBar />
       <DiagonalHeader title="Create your account" />
+
+      {/* Full-screen loader overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-brand-navy/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center gap-4">
+          <div className="bg-white rounded-[24px] px-10 py-8 flex flex-col items-center gap-4 shadow-2xl">
+            <Loader2 size={40} className="text-brand-gold animate-spin" />
+            <p className="text-[15px] font-bold text-brand-navy">Creating your account…</p>
+            <p className="text-[12px] text-brand-muted text-center">
+              {slowMessage
+                ? 'Still working… your connection may be slow. Please wait.'
+                : 'This only takes a moment.'}
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 p-6 pb-8 flex flex-col gap-6">
         <div className="flex flex-col gap-4">
@@ -61,7 +126,8 @@ export const AccountCreation = () => {
               value={formData.fullName}
               onChange={handleChange}
               placeholder="Enter your full name"
-              className="h-12 bg-white border border-[#CCCCCC] rounded-[8px] px-4 text-[14px] focus:outline-none focus:border-brand-gold"
+              disabled={isLoading}
+              className="h-12 bg-white border border-[#CCCCCC] rounded-[8px] px-4 text-[14px] focus:outline-none focus:border-brand-gold disabled:opacity-50"
             />
             {submitted && !formData.fullName.trim() && (
               <span className="text-[11px] text-red-500 mt-1 ml-1">Please enter your full name</span>
@@ -76,15 +142,14 @@ export const AccountCreation = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
-              className="h-12 bg-white border border-[#CCCCCC] rounded-[8px] px-4 text-[14px] focus:outline-none focus:border-brand-gold"
+              disabled={isLoading}
+              className="h-12 bg-white border border-[#CCCCCC] rounded-[8px] px-4 text-[14px] focus:outline-none focus:border-brand-gold disabled:opacity-50"
             />
-            {submitted && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && (
+            {submitted && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && !emailError && (
               <span className="text-[11px] text-red-500 mt-1 ml-1">Please enter a valid email address</span>
             )}
             {emailError && (
-              <span className="text-[11px] text-red-500 mt-1 ml-1">
-                {emailError}
-              </span>
+              <span className="text-[11px] text-red-500 mt-1 ml-1">{emailError}</span>
             )}
           </div>
 
@@ -92,14 +157,16 @@ export const AccountCreation = () => {
             <label className="text-[12px] font-bold text-brand-navy ml-1">PASSWORD</label>
             <div className="relative">
               <input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Create a password"
-                className="w-full h-12 bg-white border border-[#CCCCCC] rounded-[8px] px-4 pr-12 text-[14px] focus:outline-none focus:border-brand-gold"
+                placeholder="At least 8 characters"
+                disabled={isLoading}
+                className="w-full h-12 bg-white border border-[#CCCCCC] rounded-[8px] px-4 pr-12 text-[14px] focus:outline-none focus:border-brand-gold disabled:opacity-50"
               />
               <button
+                type="button"
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-muted"
                 onClick={() => setShowPassword(!showPassword)}
               >
@@ -118,7 +185,8 @@ export const AccountCreation = () => {
                 name="classLevel"
                 value={formData.classLevel}
                 onChange={handleChange}
-                className="h-12 bg-white border border-[#CCCCCC] rounded-[8px] px-4 text-[14px] focus:outline-none focus:border-brand-gold appearance-none"
+                disabled={isLoading}
+                className="h-12 bg-white border border-[#CCCCCC] rounded-[8px] px-4 text-[14px] focus:outline-none focus:border-brand-gold appearance-none disabled:opacity-50"
               >
                 <option value="">Select your class</option>
                 <option>Pre-Nursery</option>
@@ -145,7 +213,8 @@ export const AccountCreation = () => {
                 value={formData.schoolName}
                 onChange={handleChange}
                 placeholder="Enter your school name"
-                className="h-12 bg-white border border-[#CCCCCC] rounded-[8px] px-4 text-[14px] focus:outline-none focus:border-brand-gold"
+                disabled={isLoading}
+                className="h-12 bg-white border border-[#CCCCCC] rounded-[8px] px-4 text-[14px] focus:outline-none focus:border-brand-gold disabled:opacity-50"
               />
             </div>
           )}
@@ -157,6 +226,7 @@ export const AccountCreation = () => {
             name="agreed"
             checked={formData.agreed}
             onChange={handleChange}
+            disabled={isLoading}
             className="mt-1 w-4 h-4 rounded border-[#CCCCCC] accent-brand-gold"
           />
           <div>
@@ -173,53 +243,12 @@ export const AccountCreation = () => {
       <div className="p-6 pb-8 flex flex-col gap-4 bg-white border-t border-[#DDDDDD]">
         <Button
           fullWidth
-          disabled={!isFormValid() && submitted}
-          onClick={async () => {
-            setSubmitted(true);
-            if (!isFormValid()) return;
-
-            const result = await registerWithSupabase({
-              fullName: formData.fullName,
-              email: formData.email,
-              password: formData.password,
-              role: role as 'student' | 'child' | 'teacher' | 'parent',
-              classLevel: formData.classLevel,
-              schoolName: formData.schoolName,
-            });
-
-            if (!result.success) {
-              const errorMessage = result.error || '';
-
-              if (
-                errorMessage.includes('fetch') ||
-                errorMessage.includes('network') ||
-                errorMessage.includes('Failed')
-              ) {
-                setEmailError(
-                  'Connection error. Please check your internet connection and try again.'
-                );
-              } else if (errorMessage.includes('already')) {
-                setEmailError(
-                  'An account with this email already exists. Please log in instead.'
-                );
-              } else {
-                setEmailError(
-                  errorMessage || 'Registration failed. Try again.'
-                );
-              }
-              console.error('Registration error:', result.error);
-              return;
-            }
-
-            setUser(null);
-            localStorage.setItem('pendingRole', role);
-            localStorage.setItem('debrilllearn_pending_role', role);
-            navigate('/email-verification', { state: { role } });
-          }}
+          disabled={isLoading}
+          onClick={handleSubmit}
         >
-          Create account
+          {isLoading ? 'Creating account…' : 'Create account'}
         </Button>
-        <Button variant="outline" fullWidth onClick={() => navigate(-1)}>
+        <Button variant="outline" fullWidth onClick={() => navigate(-1)} disabled={isLoading}>
           Back
         </Button>
       </div>

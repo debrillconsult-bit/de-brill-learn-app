@@ -6,7 +6,7 @@ import { Bell, ChevronLeft } from 'lucide-react';
 export const NotificationsScreen = () => {
   const navigate = useNavigate();
   return (
-    <div className="min-h-screen flex flex-col bg-[#F5F7FA]">
+    <div className="h-full flex flex-col bg-[#F5F7FA]">
       <DiagonalHeader title="Notifications">
         <button onClick={() => navigate(-1)} className="ml-4 text-brand-navy">
           <ChevronLeft size={24} />

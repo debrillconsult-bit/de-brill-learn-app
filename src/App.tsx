@@ -1,6 +1,10 @@
 import React from 'react';
-import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { App as CapacitorApp } from '@capacitor/app';
 import { SplashScreen } from './screens/FlowA/SplashScreen';
+import { ForgotPassword } from './screens/FlowA/ForgotPassword';
+import { ResetPassword } from './screens/FlowA/ResetPassword';
+import { PINLockScreen } from './screens/FlowA/PINLockScreen';
 import { WelcomeCarousel } from './screens/FlowA/WelcomeCarousel';
 import { LoginScreen } from './screens/FlowA/LoginScreen';
 import { RoleSelection } from './screens/FlowA/RoleSelection';
@@ -38,12 +42,19 @@ import { HelpCenterScreen } from './screens/FlowF/HelpCenter';
 import { AboutScreen } from './screens/FlowF/About';
 import { TeacherDashboard } from './screens/FlowG/TeacherDashboard';
 import { ClassManagement } from './screens/FlowG/ClassManagement';
+import { TeacherAnalytics } from './screens/FlowG/TeacherAnalytics';
+import { TeacherResources } from './screens/FlowG/TeacherResources';
+import { TeacherProfile } from './screens/FlowG/TeacherProfile';
 import { TeacherWebPortal } from './screens/FlowG/TeacherWebPortal';
 import { ParentDashboard } from './screens/FlowH/ParentDashboard';
 import { ChildProgressDetail } from './screens/FlowH/ChildProgressDetail';
+import { ParentTips } from './screens/FlowH/ParentTips';
+import { ParentSettings } from './screens/FlowH/ParentSettings';
 import { SubscriptionScreen } from './screens/FlowC/SubscriptionScreen';
 import { PaymentScreen } from './screens/FlowC/PaymentScreen';
 import { BottomNav } from './components/BottomNav';
+import { TeacherBottomNav } from './components/TeacherBottomNav';
+import { ParentBottomNav } from './components/ParentBottomNav';
 import { AdminLayout } from './features/admin/components/AdminLayout';
 import { AdminDashboardPage } from './features/admin/pages/Dashboard';
 import { AdminUsersPage } from './features/admin/pages/Users';
@@ -133,33 +144,38 @@ class ErrorBoundary extends React.Component<
 
 const AppShell = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { isLoading } = useAuth();
   const isAdminRoute =
     location.pathname.startsWith('/admin') || location.pathname.startsWith('/teacher/portal');
 
-  if (isLoading) {
-    return (
-      <div className="max-w-[390px] mx-auto bg-white min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <img
-            src="/dbc-logo.png"
-            alt="De-Brill Learn"
-            className="w-20 h-20 object-contain animate-pulse"
-          />
-          <p className="text-[14px] text-brand-muted font-medium">
-            Loading...
-          </p>
-        </div>
-      </div>
-    );
-  }
+  React.useEffect(() => {
+    let listener: any;
+    const handleBackButton = async () => {
+      const rootPaths = ['/', '/welcome', '/home-student', '/home-child', '/teacher/dashboard', '/parent/dashboard'];
+      if (rootPaths.includes(location.pathname)) {
+        await CapacitorApp.exitApp();
+      } else {
+        navigate(-1);
+      }
+    };
+
+    CapacitorApp.addListener('backButton', handleBackButton).then(l => {
+      listener = l;
+    });
+
+    return () => {
+      if (listener) listener.remove();
+    };
+  }, [navigate, location.pathname]);
+
 
   return (
     <div
       className={
         isAdminRoute
-          ? 'min-h-screen bg-[#EEF3F8]'
-          : 'max-w-[390px] mx-auto bg-white min-h-screen shadow-2xl relative flex flex-col'
+          ? 'w-full h-full bg-[#EEF3F8] overflow-y-auto'
+          : 'w-full h-full bg-white flex flex-col relative overflow-hidden'
       }
     >
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -167,6 +183,9 @@ const AppShell = () => {
           <Route path="/" element={<SplashScreen />} />
           <Route path="/welcome" element={<WelcomeCarousel />} />
           <Route path="/login" element={<LoginScreen />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/pin-lock" element={<PINLockScreen />} />
           <Route path="/role-selection" element={<RoleSelection />} />
           <Route path="/account-creation" element={<AccountCreation />} />
           <Route path="/email-verification" element={<EmailVerification />} />
@@ -218,14 +237,14 @@ const AppShell = () => {
             <Route path="analytics" element={<AdminAnalyticsPage />} />
           </Route>
           <Route path="/teacher/class/:id" element={<ClassManagement />} />
-          <Route path="/teacher/analytics" element={<Placeholder name="Analytics" />} />
-          <Route path="/teacher/resources" element={<Placeholder name="Resources" />} />
-          <Route path="/teacher/profile" element={<Placeholder name="Teacher Profile" />} />
+          <Route path="/teacher/analytics" element={<TeacherAnalytics />} />
+          <Route path="/teacher/resources" element={<TeacherResources />} />
+          <Route path="/teacher/profile" element={<TeacherProfile />} />
 
           <Route path="/parent/dashboard" element={<ParentDashboard />} />
           <Route path="/parent/child/:id" element={<ChildProgressDetail />} />
-          <Route path="/parent/tips" element={<Placeholder name="Parenting Tips" />} />
-          <Route path="/parent/settings" element={<Placeholder name="Parent Settings" />} />
+          <Route path="/parent/tips" element={<ParentTips />} />
+          <Route path="/parent/settings" element={<ParentSettings />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
@@ -233,12 +252,21 @@ const AppShell = () => {
 
       {!isAdminRoute ? (
         <Routes>
+          <Route path="/home-child" element={<BottomNav />} />
           <Route path="/home-student" element={<BottomNav />} />
           <Route path="/library" element={<BottomNav />} />
           <Route path="/practice" element={<BottomNav />} />
           <Route path="/progress" element={<BottomNav />} />
           <Route path="/profile" element={<BottomNav />} />
           <Route path="/sound-chart" element={<BottomNav />} />
+          <Route path="/teacher/dashboard" element={<TeacherBottomNav />} />
+          <Route path="/teacher/analytics" element={<TeacherBottomNav />} />
+          <Route path="/teacher/resources" element={<TeacherBottomNav />} />
+          <Route path="/teacher/profile" element={<TeacherBottomNav />} />
+          <Route path="/parent/dashboard" element={<ParentBottomNav />} />
+          <Route path="/parent/tips" element={<ParentBottomNav />} />
+          <Route path="/parent/settings" element={<ParentBottomNav />} />
+          <Route path="*" element={null} />
         </Routes>
       ) : null}
     </div>

@@ -31,7 +31,7 @@ export const GamePlaceholder = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-brand-offwhite min-h-screen">
+    <div className="flex-1 flex flex-col bg-brand-offwhite h-full">
       <StatusBar />
       <DiagonalHeader title={game.title} />
 

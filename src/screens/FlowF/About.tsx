@@ -6,7 +6,7 @@ import { ChevronLeft } from 'lucide-react';
 export const AboutScreen = () => {
   const navigate = useNavigate();
   return (
-    <div className="min-h-screen flex flex-col bg-[#F5F7FA]">
+    <div className="h-full flex flex-col bg-[#F5F7FA]">
       <DiagonalHeader title="About De-Brill Learn">
         <button onClick={() => navigate(-1)} className="ml-4 text-brand-navy">
           <ChevronLeft size={24} />

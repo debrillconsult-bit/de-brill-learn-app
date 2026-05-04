@@ -2,32 +2,73 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { StatusBar, DiagonalHeader } from '@/src/components/Layout';
 import { Button } from '@/src/components/Button';
-import { Mail } from 'lucide-react';
+import { Mail, Zap } from 'lucide-react';
+import { supabase } from '@/src/lib/supabase';
+import { ensureProfileExists } from '@/src/lib/supabaseAuth';
+import { useAuth } from '@/src/lib/AuthContext';
 
 export const EmailVerification = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [warningShown, setWarningShown] =
-    React.useState(false);
+  const { setUser } = useAuth();
+  const [isChecking, setIsChecking] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const [successMessage, setSuccessMessage] = React.useState('');
+  const [isResending, setIsResending] = React.useState(false);
 
-  const handleContinue = () => {
-    if (!warningShown) {
-      setWarningShown(true);
-      return;
+  const email = (location.state as any)?.email || localStorage.getItem('pendingEmail') || 'your email';
+  const role = (location.state as any)?.role || localStorage.getItem('pendingRole') || 'student';
+
+  const getDestination = (r: string) => {
+    if (r === 'teacher') return '/profile-setup-teacher';
+    return '/profile-setup-child';
+  };
+
+  // Check if email is actually verified via Supabase session
+  const handleContinue = async () => {
+    setIsChecking(true);
+    setError('');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email_confirmed_at) {
+        const profile = await ensureProfileExists(user);
+        setUser(profile as any);
+        navigate(getDestination(role));
+      } else {
+        setError('Your email has not been verified yet. Please click the link in your inbox first.');
+      }
+    } catch {
+      setError('Could not check verification status. Please try again.');
+    } finally {
+      setIsChecking(false);
     }
-    const role =
-      (location.state as any)?.role ||
-      localStorage.getItem('pendingRole') ||
-      'student';
-    if (role === 'teacher') {
-      navigate('/profile-setup-teacher');
-    } else {
-      navigate('/profile-setup-child');
+  };
+
+
+  const handleResend = async () => {
+    const emailVal = (location.state as any)?.email || localStorage.getItem('pendingEmail');
+    if (!emailVal) return;
+    
+    setIsResending(true);
+    setError('');
+    setSuccessMessage('');
+    
+    try {
+      const { error: resendError } = await supabase.auth.resend({ type: 'signup', email: emailVal });
+      if (resendError) {
+        setError(resendError.message);
+      } else {
+        setSuccessMessage('Verification email resent. Please check your inbox.');
+      }
+    } catch (err) {
+      setError('Failed to resend verification email. Please try again.');
+    } finally {
+      setIsResending(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-brand-offwhite">
+    <div className="h-full flex flex-col bg-brand-offwhite">
       <StatusBar />
       <DiagonalHeader title="Verify your email" />
       
@@ -39,29 +80,36 @@ export const EmailVerification = () => {
         <div className="flex flex-col gap-3">
           <h2 className="text-[20px]">Check your inbox</h2>
           <p className="text-brand-mid text-[14px] leading-relaxed px-4">
-            We've sent a verification link to <span className="font-bold text-brand-navy">dbrillconcept@gmail.com</span>. Please click the link to verify your account.
+            We've sent a verification link to{' '}
+            <span className="font-bold text-brand-navy">{email}</span>.
+            Please click the link to verify your account.
           </p>
-          <p className="text-[11px] text-brand-muted text-center mt-2 px-6">
-            A verification link has been sent to your email address. Please check your inbox and spam folder, then click the link to verify your account.
-          </p>
-          {warningShown && (
-            <p className="text-[12px] text-[#F47920] text-center px-6 mt-2">
-              Please check your inbox and verify first. Tap again only if you want to skip verification.
+          {error && (
+            <p className="text-[13px] text-red-500 bg-red-50 border border-red-200 rounded-[8px] p-3 mt-2">
+              {error}
+            </p>
+          )}
+          {successMessage && (
+            <p className="text-[13px] text-green-600 bg-green-50 border border-green-200 rounded-[8px] p-3 mt-2">
+              {successMessage}
             </p>
           )}
         </div>
 
-        <button className="text-brand-gold font-bold text-[14px] hover:underline">
-          Resend verification email
+        <button 
+          onClick={handleResend} 
+          disabled={isResending}
+          className="text-brand-gold font-bold text-[14px] hover:underline disabled:opacity-50"
+        >
+          {isResending ? 'Resending...' : 'Resend verification email'}
         </button>
       </div>
 
-      <div className="p-6 pb-8 flex flex-col gap-4">
-        <Button fullWidth onClick={handleContinue}>
-          {warningShown
-            ? 'Continue without verifying'
-            : 'I have verified my email'}
+      <div className="p-6 pb-8 flex flex-col gap-3">
+        <Button fullWidth onClick={handleContinue} disabled={isChecking}>
+          {isChecking ? 'Checking...' : 'I have verified my email'}
         </Button>
+
         <Button variant="outline" fullWidth onClick={() => navigate(-1)}>
           Back
         </Button>

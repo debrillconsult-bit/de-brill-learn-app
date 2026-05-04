@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { StatusBar } from '@/src/components/Layout';
-import { X, Volume2, ChevronRight, ChevronLeft } from 'lucide-react';
+import { StatusBar, LessonHeader } from '@/src/components/Layout';
+import { Volume2, ChevronRight, ChevronLeft } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { speakText, stopSpeaking } from '@/src/lib/speech';
@@ -29,21 +29,10 @@ export const LessonWords = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-brand-offwhite">
+    <div className="h-full flex flex-col bg-brand-offwhite">
       <StatusBar />
       
-      {/* Lesson Header */}
-      <div className="bg-white border-b border-[#DDDDDD] px-4 py-3 flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="text-brand-muted">
-          <X size={24} />
-        </button>
-        <div className="flex-1 mx-4">
-          <div className="h-1.5 w-full bg-[#EEEEEE] rounded-full overflow-hidden">
-            <div className="h-full w-[30%] bg-brand-gold rounded-full" />
-          </div>
-        </div>
-        <span className="text-[11px] font-bold text-brand-muted">{currentIndex + 1} / {words.length}</span>
-      </div>
+      <LessonHeader progress={30} current={currentIndex + 1} total={words.length} />
 
       <div className="flex-1 p-6 flex flex-col gap-6">
         <div className="flex items-center justify-between">

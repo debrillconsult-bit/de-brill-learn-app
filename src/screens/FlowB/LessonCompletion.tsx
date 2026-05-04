@@ -18,7 +18,7 @@ export const LessonCompletion = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-brand-navy relative overflow-hidden">
+    <div className="h-full flex flex-col bg-brand-navy relative overflow-hidden">
       <StatusBar />
       
       {/* IPA Watermark */}

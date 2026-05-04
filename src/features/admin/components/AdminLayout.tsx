@@ -106,7 +106,6 @@ export const AdminLayout = () => {
               <button
                 onClick={async () => {
                   await logout();
-                  navigate('/login');
                 }}
                 className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#10244E] px-4 py-3 text-[13px] font-bold"
               >

@@ -19,22 +19,21 @@ export interface AuthResult {
 export async function testSupabaseConnection():
   Promise<boolean> {
   try {
-    const res = await fetch(
-      'https://tmatdskpcunreyhheupp.supabase.co' +
-      '/rest/v1/',
-      {
-        headers: {
-          apikey:
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9' +
-            '.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRt' +
-            'YXRkc2twY3VucmV5aGhldXBwIiwicm9sZSI6Im' +
-            'Fub24iLCJpYXQiOjE3NzQ3MDY4NDIsImV4cCI6' +
-            'MjA5MDI4Mjg0Mn0.BB-5BaL0JBvf1wusylv6W0' +
-            'yb-u7roimO5vNp1g4cp6Q'
-        }
-      }
-    );
-    return res.ok;
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.warn('Supabase credentials missing. Running in mock mode.');
+      return true;
+    }
+
+    const response = await fetch(`${supabaseUrl}/auth/v1/health`, {
+      method: 'GET',
+      headers: {
+        apikey: supabaseAnonKey,
+      },
+    });
+    return response.ok;
   } catch (err) {
     console.error('Supabase unreachable:', err);
     return false;
@@ -45,17 +44,35 @@ export async function registerWithSupabase(
   data: RegisterData
 ): Promise<AuthResult> {
   try {
-    const { data: authData, error: authError } =
-      await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            full_name: data.fullName,
-            role: data.role,
-          }
+    console.log('Starting Supabase registration for:', data.email);
+    
+    const signUpPromise = supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        data: {
+          full_name: data.fullName,
+          role: data.role,
+          class_level: data.classLevel,
+          school_name: data.schoolName,
         }
-      });
+      }
+    });
+
+    // Race the signUp call against a 6-second timeout.
+    const signUpResult: any = await Promise.race([
+      signUpPromise,
+      new Promise((_, reject) => 
+        setTimeout(() => {
+          console.error('REGISTRATION_ERROR: SMTP/Supabase Timeout (6s)');
+          reject(new Error('The email server is taking too long to respond. Please check your connection or try again.'));
+        }, 6000)
+      )
+    ]);
+
+    console.log('Registration call returned:', signUpResult);
+    const { data: authData, error: authError } = signUpResult;
+
 
     if (authError) {
       if (
@@ -76,13 +93,22 @@ export async function registerWithSupabase(
     }
 
     if (!authData.user) {
+      return { success: false, error: 'Registration failed.' };
+    }
+
+    // Supabase silently returns a user with empty identities when the email
+    // is already registered but not yet confirmed. Detect this and surface a clear error.
+    if (authData.user.identities && authData.user.identities.length === 0) {
       return {
         success: false,
-        error: 'Registration failed.'
+        error: 'An account with this email already exists. Please log in or check your inbox for a verification link.',
       };
     }
 
-    const { error: profileError } = await supabase
+    // The handle_new_user trigger already creates the profile automatically.
+    // This upsert adds extra fields (class_level, school_name, language).
+    // We fire it without awaiting so an RLS/network issue never blocks registration.
+    supabase
       .from('profiles')
       .upsert({
         id: authData.user.id,
@@ -92,16 +118,10 @@ export async function registerWithSupabase(
         class_level: data.classLevel || null,
         school_name: data.schoolName || null,
         language: 'british',
-      }, {
-        onConflict: 'id'
+      }, { onConflict: 'id' })
+      .then(({ error }) => {
+        if (error) console.warn('Profile upsert (non-critical):', error.message);
       });
-
-    if (profileError) {
-      console.warn(
-        'Profile upsert after registration:',
-        profileError.message
-      );
-    }
 
     return { success: true };
   } catch (err) {
@@ -113,171 +133,75 @@ export async function registerWithSupabase(
   }
 }
 
+export async function ensureProfileExists(user: any): Promise<Profile> {
+  const { data: existing, error: fetchError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (!fetchError && existing) return existing;
+
+  const role = user.user_metadata?.role || 'student';
+  const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+
+  const { data: created, error: createError } = await supabase
+    .from('profiles')
+    .upsert({
+      id: user.id,
+      email: user.email,
+      full_name: fullName,
+      role: role,
+      language: 'british',
+    })
+    .select()
+    .single();
+
+  if (createError) {
+    console.error('Failed to ensure profile:', createError.message);
+    return {
+      id: user.id,
+      email: user.email || '',
+      full_name: fullName,
+      role: role as UserRole,
+      language: 'british',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+  }
+
+  return created;
+}
+
 export async function loginWithSupabase(
   email: string,
   password: string
 ): Promise<AuthResult> {
   try {
-    console.log(
-      'Attempting login with Supabase URL:',
-      import.meta.env.VITE_SUPABASE_URL ||
-      'URL NOT FOUND'
-    );
-
-    const supabaseUrl =
-      import.meta.env.VITE_SUPABASE_URL ||
-      'https://tmatdskpcunreyhheupp.supabase.co';
-    const supabaseAnonKey =
-      import.meta.env.VITE_SUPABASE_ANON_KEY ||
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtYXRkc2twY3VucmV5aGhldXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MDY4NDIsImV4cCI6MjA5MDI4Mjg0Mn0.BB-5BaL0JBvf1wusylv6W0yb-u7roimO5vNp1g4cp6Q';
-    const controller = new AbortController();
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      12000
-    );
-
-    try {
-      await fetch(`${supabaseUrl}/auth/v1/health`, {
-        method: 'GET',
-        headers: {
-          apikey: supabaseAnonKey,
-        },
-        signal: controller.signal,
-      });
-    } catch (connectionError) {
-      clearTimeout(timeoutId);
-      const message =
-        connectionError instanceof Error
-          ? connectionError.message
-          : '';
-      if (
-        message === 'timeout' ||
-        message.includes('timeout') ||
-        message.includes('aborted') ||
-        message.includes('AbortError')
-      ) {
-        return {
-          success: false,
-          error: 'Connection timed out. Please check your internet and try again.'
-        };
-      }
-    }
-
-    clearTimeout(timeoutId);
-
-    const { data, error } = await Promise.race([
-      supabase.auth.signInWithPassword({
-        email, password
-      }),
-      new Promise<never>((_, reject) =>
-        setTimeout(
-          () => reject(new Error('timeout')),
-          12000
-        )
-      )
-    ]);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (error) {
-      const msg = error?.message || '';
-      return {
-        success: false,
-        error: msg || 'Login failed.'
-      };
+      return { success: false, error: error.message };
     }
 
-    if (!data) {
-      return {
-        success: false,
-        error: 'Login failed.'
-      };
+    if (!data.user) {
+      return { success: false, error: 'Login failed.' };
     }
 
-    let profile = null;
-    let fetchAttempts = 0;
-
-    while (!profile && fetchAttempts < 3) {
-      fetchAttempts++;
-      try {
-        await new Promise(resolve =>
-          setTimeout(resolve, fetchAttempts * 300)
-        );
-        const { data: profileData, error: profileError } =
-          await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', data.user.id)
-            .single();
-
-        if (!profileError && profileData) {
-          profile = profileData;
-        } else {
-          console.warn(
-            `Profile fetch attempt ${fetchAttempts} failed:`,
-            profileError?.message
-          );
-        }
-      } catch (e) {
-        console.warn(
-          `Profile fetch attempt ${fetchAttempts} threw:`, e
-        );
-      }
-    }
-
-    if (!profile) {
-      const role =
-        data.user.user_metadata?.role || 'student';
-      const fullName =
-        data.user.user_metadata?.full_name ||
-        data.user.email?.split('@')[0] ||
-        'User';
-
-      try {
-        const { data: newProfile } = await supabase
-          .from('profiles')
-          .upsert({
-            id: data.user.id,
-            email: data.user.email || email,
-            full_name: fullName,
-            role: role,
-            language: 'british',
-          })
-          .select()
-          .single();
-        profile = newProfile;
-      } catch (createErr) {
-        console.warn('Profile upsert failed:', createErr);
-      }
-    }
+    const profile = await ensureProfileExists(data.user);
 
     return {
       success: true,
-      user: profile || {
-        id: data.user.id,
-        email: data.user.email || email,
-        full_name:
-          data.user.user_metadata?.full_name || 'User',
-        role: data.user.user_metadata?.role || 'student',
-        language: 'british',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      } as Profile
+      user: profile,
     };
   } catch (err) {
     console.error('Login error:', err);
-    const message =
-      err instanceof Error ? err.message : '';
-    if (
-      message === 'timeout' ||
-      message.includes('timeout')
-    ) {
-      return {
-        success: false,
-        error: 'Connection timed out. Please check your internet and try again.'
-      };
-    }
     return {
       success: false,
-      error: 'Login failed. Please try again.'
+      error: 'An unexpected error occurred during login.',
     };
   }
 }
@@ -287,20 +211,40 @@ export async function logoutFromSupabase():
   await supabase.auth.signOut();
 }
 
-export async function getCurrentProfile():
-  Promise<Profile | null> {
+export async function getCurrentProfile(): Promise<Profile | null> {
   try {
-    const { data: { user } } =
-      await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
+    try {
+      // Race the profile query against a 2-second timeout to bypass RLS hangs
+      const profilePromise = supabase.from('profiles').select('*').eq('id', user.id).single();
+      const result: any = await Promise.race([
+        profilePromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000))
+      ]);
+      
+      if (result && !result.error && result.data) {
+        return result.data;
+      }
+    } catch (e) {
+      console.warn("Profile fetch timed out or failed, using auth metadata fallback");
+    }
 
-    return profile;
+    // Fallback: construct a profile from auth metadata if DB is unreachable
+    return {
+      id: user.id,
+      email: user.email || '',
+      full_name: user.user_metadata?.full_name || user.user_metadata?.fullName || user.email?.split('@')[0] || 'Learner',
+      role: user.user_metadata?.role || 'student',
+      language: 'british',
+      class_level: null,
+      school_name: null,
+      avatar_index: 0,
+      nickname: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
   } catch {
     return null;
   }

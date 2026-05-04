@@ -9,7 +9,7 @@ export const ProfileSetupTeacher = () => {
   const [schoolName, setSchoolName] = React.useState('');
 
   return (
-    <div className="min-h-screen flex flex-col bg-brand-offwhite overflow-y-auto">
+    <div className="h-full flex flex-col bg-brand-offwhite overflow-y-auto">
       <StatusBar />
       <DiagonalHeader title="Teacher Profile Setup" accentColor="#2E7D32" />
       

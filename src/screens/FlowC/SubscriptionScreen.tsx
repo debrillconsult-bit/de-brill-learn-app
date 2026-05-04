@@ -41,7 +41,7 @@ export const SubscriptionScreen = () => {
   const [selectedSeries, setSelectedSeries] = React.useState<'phonics' | 'mep'>('mep');
 
   return (
-    <div className="min-h-screen flex flex-col bg-brand-offwhite overflow-y-auto">
+    <div className="h-full flex flex-col bg-brand-offwhite overflow-y-auto">
       <StatusBar />
       <DiagonalHeader title="Choose Your Plan" />
 

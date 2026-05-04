@@ -25,7 +25,7 @@ function renderSlideCard(index: number): React.ReactNode {
     // Slide 0 — "8 Books. One Platform."
     // Gold left diagonal, navy right diagonal, 3 book spines in navy, "8 Books" label on gold
     return (
-      <div className="relative w-64 h-64 rounded-2xl overflow-hidden flex-shrink-0">
+      <div className="relative w-48 h-48 rounded-2xl overflow-hidden flex-shrink-0">
         <div className="absolute inset-0 bg-brand-gold diagonal-header-gold" />
         <div className="absolute inset-0 bg-brand-navy diagonal-header-navy" />
         {/* Content layer */}
@@ -49,7 +49,7 @@ function renderSlideCard(index: number): React.ReactNode {
     // Slide 1 — "AI That Listens When You Speak"
     // Navy left diagonal, series-green right diagonal, animated waveform centred
     return (
-      <div className="relative w-64 h-64 rounded-2xl overflow-hidden flex-shrink-0">
+      <div className="relative w-48 h-48 rounded-2xl overflow-hidden flex-shrink-0">
         <div className="absolute inset-0 bg-brand-navy diagonal-header-gold" />
         <div className="absolute inset-0 bg-series-green diagonal-header-navy" />
         {/* Animated waveform: 5 bars of varying heights, bg-brand-gold, animate-pulse */}
@@ -102,7 +102,7 @@ export const WelcomeCarousel = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="h-[100dvh] flex flex-col bg-white overflow-hidden">
       <StatusBar />
 
       <div className="flex items-center justify-center pt-4 pb-2">
@@ -113,7 +113,7 @@ export const WelcomeCarousel = () => {
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center justify-center p-8 pb-8 relative">
+      <div className="flex-1 flex flex-col items-center justify-center px-8 pb-2 relative overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
@@ -122,7 +122,7 @@ export const WelcomeCarousel = () => {
             exit={{ opacity: 0, x: -20 }}
             className="flex flex-col items-center text-center"
           >
-            <div className="mb-12">
+            <div className="mb-8">
               {renderSlideCard(currentSlide)}
             </div>
             <h2 className="text-[24px] mb-4">{slides[currentSlide].title}</h2>
@@ -133,7 +133,7 @@ export const WelcomeCarousel = () => {
         </AnimatePresence>
 
         {/* Language variant toggle */}
-        <div className="flex gap-2 mt-10">
+        <div className="flex gap-2 mt-6">
           <button
             className={cn(
               "text-[11px] px-3 py-1 rounded-full",
@@ -167,7 +167,7 @@ export const WelcomeCarousel = () => {
         </div>
       </div>
 
-      <div className="p-8 pb-8 flex flex-col gap-4">
+      <div className="p-6 pb-6 flex flex-col gap-3">
         <Button 
           fullWidth 
           onClick={() => {
